@@ -9,10 +9,10 @@ const explode = ({
 }) => {
 
   let output = [];
-  let interval = parser.parseExpression(source[field]);
+  let interval = parser.parseExpression(source[field], {currentDate: start});
   let occurance = interval.next();
 
-  while(occurance._date <= end){
+  while(new Date(occurance._date.format()) <= end){
     occurance = interval.next();
     if(exclude.includes(occurance)){ continue; } // TODO: also remove the element from excludes
     output.push({
@@ -30,8 +30,8 @@ const intersection = ({
   end = new Date(),
 }) => {
 
-  const set1 = new Set(explode({{cron: cron1}, start, end}));
-  const set2 = new Set(explode({{cron: cron2}, start, end}));
+  const set1 = new Set(explode({source: {cron: cron1}, start, end}));
+  const set2 = new Set(explode({source: {cron: cron2}, start, end}));
   const intersection = new Set([...set1].filter(x => set2.has(x)));
   return intersection;
 }
