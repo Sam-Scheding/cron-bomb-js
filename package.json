@@ -1,0 +1,31 @@
+{
+  "name": "cron-dates",
+  "version": "1.0.1",
+  "description": "A simple and succinct way to generate recurring events from a single object.",
+  "main": "index.js",
+  "scripts": {
+    "test:unit": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sam-Scheding/cron-dates.git"
+  },
+  "keywords": [
+    "npm",
+    "cron",
+    "dates",
+    "js"
+  ],
+  "author": "Sam Scheding",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sam-Scheding/cron-dates/issues"
+  },
+  "homepage": "https://github.com/Sam-Scheding/cron-dates#readme",
+  "dependencies": {
+    "babel": "^6.23.0",
+    "cron-parser": "^2.13.0",
+    "jest": "^24.9.0",
+    "moment": "^2.24.0"
+  }
+}
