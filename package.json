@@ -1,27 +1,32 @@
 {
-  "name": "cron-dates",
+  "name": "cron-bomb",
   "version": "1.0.1",
-  "description": "A simple and succinct way to generate recurring events from a single object.",
+  "description": "A simple and succinct JavaScript library for generating recurring events from a single object.",
   "main": "index.js",
   "scripts": {
     "test:unit": ""
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Sam-Scheding/cron-dates.git"
+    "url": "git+https://github.com/Sam-Scheding/cron-bomb-js.git"
   },
   "keywords": [
     "npm",
     "cron",
     "dates",
-    "js"
+    "js",
+    "recurring events",
+    "repeat",
+    "repeating",
+    "repeating events",
+    "repeat events"
   ],
   "author": "Sam Scheding",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Sam-Scheding/cron-dates/issues"
+    "url": "https://github.com/Sam-Scheding/cron-bomb-js/issues"
   },
-  "homepage": "https://github.com/Sam-Scheding/cron-dates#readme",
+  "homepage": "https://github.com/Sam-Scheding/cron-bomb-js#readme",
   "dependencies": {
     "babel": "^6.23.0",
     "cron-parser": "^2.13.0",
