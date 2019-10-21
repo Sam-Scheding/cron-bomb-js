@@ -13,12 +13,12 @@ const explode = ({
   let occurance = interval.next();
 
   while(new Date(occurance._date.format()) <= end){
-    occurance = interval.next();
     if(exclude.includes(occurance)){ continue; } // TODO: also remove the element from excludes
     output.push({
       ...source,
-      [field]: occurance,
+      [field]: new Date(occurance._date.format()),
     })
+    occurance = interval.next();
   }
   return output;
 }
@@ -30,9 +30,17 @@ const intersection = ({
   end = new Date(),
 }) => {
 
-  const set1 = new Set(explode({source: {cron: cron1}, start, end}));
-  const set2 = new Set(explode({source: {cron: cron2}, start, end}));
-  const intersection = new Set([...set1].filter(x => set2.has(x)));
+  const dates1 = explode({source: {cron: cron1}, start, end});
+  const dates2 = explode({source: {cron: cron2}, start, end});
+  const intersection = [];
+
+  // TODO: This is n^2. Come up with a better way to do this.
+  dates1.forEach((date1) => {
+    dates2.forEach((date2) => {
+      if(date1.cron.getTime() === date2.cron.getTime()){ intersection.push(date1.cron); }
+    })
+  })
+
   return intersection;
 }
 
