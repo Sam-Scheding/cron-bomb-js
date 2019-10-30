@@ -41,9 +41,10 @@ const explode = ({
   return output;
 }
 
-const skip = (instance, exclude) => {
+const skip = (current, exclude) => {
   exclude.forEach(date => {
-    if(date.getTime() === instance.getTime()){ return true; }
+    console.log("if ", date, " === ", current.toDate());
+    if(date.getTime() === current.toDate().getTime()){ return true; }
   });
   return false;
 }
