@@ -1,26 +1,51 @@
 var parser = require('cron-parser');
 
 const explode = ({
+  start = Date.now(),
+  end = Date.now(),
   source = {},
-  start = new Date(),
-  end = new Date(),
   field = 'cron',
   exclude = [],
+  sorted = false, // TODO: This doesn't do anything
 }) => {
 
+  // TODO: Use a reducer instead
   let output = [];
-  let interval = parser.parseExpression(source[field], {currentDate: start});
-  let occurance = interval.next();
+  // Allow users to pass in a single cron string, or an array of multiple cron strings
+  let crons = [].concat(source[field]);
 
-  while(new Date(occurance._date.format()) <= end){
-    if(exclude.includes(occurance)){ continue; } // TODO: also remove the element from excludes
-    output.push({
-      ...source,
-      [field]: new Date(occurance._date.format()),
-    })
-    occurance = interval.next();
-  }
+  crons.forEach((cron) => {
+    const options = {
+      currentDate: start,
+      endDate: end,
+      utc: true,
+    };
+    let interval = parser.parseExpression(cron, options);
+    let current;
+
+    while(true){
+      try {
+        current = interval.next()._date;
+        if(skip(current, exclude)){ continue; }
+        output.push({
+          ...source,
+          [field]: current,
+        })
+      } catch (err) {
+        break;
+      }
+    }
+  });
+
+
   return output;
+}
+
+const skip = (instance, exclude) => {
+  exclude.forEach(date => {
+    if(date.getTime() === instance.getTime()){ return true; }
+  });
+  return false;
 }
 
 const intersection = ({
@@ -37,13 +62,14 @@ const intersection = ({
   // TODO: This is n^2. Come up with a better way to do this.
   dates1.forEach((date1) => {
     dates2.forEach((date2) => {
+
+      // Since this isn't a Set, it has the potential for duplicates
       if(date1.cron.getTime() === date2.cron.getTime()){ intersection.push(date1.cron); }
     })
   })
 
   return intersection;
 }
-
 
 module.exports.explode = explode;
 module.exports.intersection = intersection;
