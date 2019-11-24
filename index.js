@@ -11,8 +11,8 @@ const explode = ({
 
   // TODO: Use a reduce instead
   let output = [];
-  // Allow users to pass in a single cron string, or an array of multiple cron strings
-  let crons = [].concat(source[field]);
+  // Allow users to pass in a single crontab, or an array of multiple cron tabs
+  let crons = [].concat(data[field]);
 
   crons.forEach((cron) => {
     const options = {
@@ -23,12 +23,14 @@ const explode = ({
     let interval = parser.parseExpression(cron, options);
     let current;
 
+    // Using exceptions for desired behaviour is dumb as fuck, but
+    // this is the preferred way of using cron-parser for some reason *shrug*
     while(true){
       try {
         current = interval.next()._date;
         if(skip(current, exclude)){ continue; }
         output.push({
-          ...source,
+          ...data,
           [field]: current,
         })
       } catch (err) {
@@ -36,20 +38,11 @@ const explode = ({
       }
     }
   });
-
-    output.push({
-      ...data,
-      [field]: instance,
-    })
-    d = interval.next();
-    instance = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()));
-
   return output;
 }
 
 const skip = (current, exclude) => {
   exclude.forEach(date => {
-    console.log("if ", date, " === ", current.toDate());
     if(date.getTime() === current.toDate().getTime()){ return true; }
   });
   return false;
