@@ -3,14 +3,14 @@ var parser = require('cron-parser');
 const explode = ({
   start = Date.now(),
   end = Date.now(),
-  source = {},
+  data = {},
   field = 'cron',
   exclude = [],
 }) => {
 
-  // TODO: Use a reducer instead
+  // TODO: Use a reduce instead
   let output = [];
-  let interval = parser.parseExpression(source[field], {currentDate: start});
+  let interval = parser.parseExpression(data[field], {currentDate: start});
 
   let d = interval.next();
   let instance = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()));
@@ -23,7 +23,7 @@ const explode = ({
     if(skip){ continue; }
 
     output.push({
-      ...source,
+      ...data,
       [field]: instance,
     })
     d = interval.next();
@@ -40,8 +40,8 @@ const intersection = ({
   end = new Date(),
 }) => {
 
-  const dates1 = explode({source: {cron: cron1}, start, end});
-  const dates2 = explode({source: {cron: cron2}, start, end});
+  const dates1 = explode({data: {cron: cron1}, start, end});
+  const dates2 = explode({data: {cron: cron2}, start, end});
   const intersection = [];
   // TODO: This is n^2. Come up with a better way to do this.
   dates1.forEach((date1) => {

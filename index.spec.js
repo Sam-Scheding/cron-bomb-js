@@ -1,6 +1,6 @@
 
-describe('generate()', () => {
-  it("fails if the event doesn't have a 'cron' field", () => {
+describe('explode()', () => {
+  it("fails if the source object doesn't have a 'cron' field", () => {
 
   });
 

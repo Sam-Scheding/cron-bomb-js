@@ -1,6 +1,6 @@
 {
   "name": "cron-bomb",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple and succinct JavaScript library for generating recurring events from a single object.",
   "main": "index.js",
   "scripts": {
