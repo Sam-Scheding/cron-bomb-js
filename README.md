@@ -34,12 +34,12 @@ Cron-bomb is similar to option 2, in that it can describe an infinite series of 
 
   const start = new Date(2020, 0, 1, 0, 0);
   const end = new Date(2020, 0, 8, 0, 0);
-  const source = {
+  const data = {
     title: 'Lord Of The Fries',
     cron: '10 0 * * 1-5', // Every weekday at 11am
   };
 
-  const debris = explode({source, start, end})
+  const debris = explode({data, start, end})
   console.log(JSON.stringify(debris, null, 2));
 ```
 
@@ -70,28 +70,30 @@ This will print the following:
 ]
 ```
 
-Notice that the 4th and 5th of January, 2020 were skipped because these are not weekdays.
+So, what just happened? Basically, we just asked `cron-bomb` to give us a list of all dates between
+2020-01-01 and 2020-01-07 that match `10 0 * * 1-5`. Notice that the 4th and 5th of January, 2020 were skipped because these are not weekdays. An array was then returned where each element is an object that looks a lot like the original object that we passed in, except the `cron` value has been replaced with a Date.
+
 
 ## Custom field name
 
-By default, `cron-bomb` will look for a field called `cron` and use that. However, it's possible to specify any fieldname you want by adding it to the options:
+By default, `cron-bomb` will look for a field called `cron` and use that. However, it's possible to specify any field name you want by adding it to the options:
 
 ```
   import { explode } from 'cron-bomb';
 
   const start = new Date(2020, 0, 1, 0, 0);
   const end = new Date(2020, 0, 8, 0, 0);
-  const source = {
+  const data = {
     title: 'Lord Of The Fries',
     foo: '10 0 * * 1-5', // Every weekday at 11am
   };
 
-  const debris = explode({source, start, end, field: 'foo'})
+  const debris = explode({data, start, end, field: 'foo'})
   console.log(JSON.stringify(debris, null, 2));
 
 ```
 
-The fieldname will be reflected in the output array as well:
+The field name will be reflected in the output array as well:
 
 ```
 [
@@ -118,6 +120,51 @@ The fieldname will be reflected in the output array as well:
 ]
 ```
 
+## Passing multiple objects to explode
+`cron-bomb` accepts either an Object, or an Array as input for the `data` option. This means you can easily explode multiple objects at once:
+
+```
+import { explode } from 'cron-bomb';
+
+const start = new Date(Date.UTC(2020, 0, 1, 0, 0));
+const end = new Date(Date.UTC(2020, 0, 3, 0, 0));
+const data = [{
+  title: 'Lord Of The Fries',
+  cron: '10 0 * * 1-5', // Every weekday at 11am
+},
+{
+  title: 'Lords Of The Fry',
+  cron: '10 0 * * 1-5', // Every weekday at 11am
+}];
+
+const debris = explode({start, end, data, exclude: cancelledEvents});
+console.log(JSON.stringify(debris, null, 2));
+
+```
+This returns the following:
+```
+[
+  {
+    "title": "Lord Of The Fries",
+    "cron": "2020-01-01T00:10:00.000Z"
+  },
+  {
+    "title": "Lord Of The Fries",
+    "cron": "2020-01-02T00:10:00.000Z"
+  },
+  {
+    "title": "Lords Of The Fry",
+    "cron": "2020-01-01T00:10:00.000Z"
+  },
+  {
+    "title": "Lords Of The Fry",
+    "cron": "2020-01-02T00:10:00.000Z"
+  }
+]
+```
+
+Note that the returned array is ordered in regards to the elements in the array that was passed in, not by date. A `sortable` option which will use insertion sort to sort the array by date is in development and will be available in a future version. This will be more efficient than sorting the array after it is returned, but for now, it is relatively trivial to sort the returned array by date.
+
 ## Excluding Particular dates
 
 A common use case might be that an event is meant to repeat every week, but due to unforeseen circumstances, particular instances have been cancelled. For this, you can pass an array of excluded dates to `cron-bomb` and they will be skipped in the returned array:
@@ -127,15 +174,14 @@ import { explode } from 'cron-bomb';
 
 const start = new Date('October 1, 2019');
 const end = new Date('October 8, 2019');
-const source = {
+const data = {
   title: 'Lord Of The Fries',
   cron: '10 0 * * 1-5', // Every weekday at 11am
   duration: 12, // Closes at 11pm
 };
 
 const cancelledEvents = [new Date('2019-10-07T13:10:00.000Z')];
-const debris = explode({start, end, source, exclude: cancelledEvents});
-
+const debris = explode({start, end, data, exclude: cancelledEvents});
 console.log(JSON.stringify(debris, null, 2));
 ```
 
