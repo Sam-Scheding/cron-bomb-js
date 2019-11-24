@@ -30,7 +30,7 @@
   "dependencies": {
     "babel": "^6.23.0",
     "cron-parser": "^2.13.0",
-    "jest": "^24.9.0",
+    "jest": "^24.9.0"
   },
   "devDependencies": {}
 }
