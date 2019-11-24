@@ -12,7 +12,7 @@ const explode = ({
   // TODO: Use a reduce instead
   let output = [];
   // Allow users to pass in a single crontab, or an array of multiple cron tabs
-  let crons = [].concat(data[field]);
+  let crons = [].concat(data);
 
   crons.forEach((cron) => {
     const options = {
@@ -20,7 +20,7 @@ const explode = ({
       endDate: end,
       utc: true,
     };
-    let interval = parser.parseExpression(cron, options);
+    let interval = parser.parseExpression(cron[field], options);
     let current;
 
     // Using exceptions for desired behaviour is dumb as fuck, but

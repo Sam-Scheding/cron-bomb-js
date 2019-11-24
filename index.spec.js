@@ -1,6 +1,6 @@
 
 describe('explode()', () => {
-  it("fails if the source object doesn't have a 'cron' field", () => {
+  it("fails if the data object doesn't have a 'cron' field", () => {
 
   });
 
@@ -17,6 +17,14 @@ describe('explode()', () => {
   });
 
   it('removes excluded dates from the returned array', () => {
+
+  });
+
+  it('accepts data as a single object', () => {
+
+  });
+
+  it('accepts data as an array of objects', () => {
 
   });
 
