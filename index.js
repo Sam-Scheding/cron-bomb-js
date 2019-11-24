@@ -18,7 +18,7 @@ const explode = ({
     const options = {
       currentDate: start,
       endDate: end,
-      utc: true,
+      utc: false,
     };
     let interval = parser.parseExpression(event[field], options);
     let current;
