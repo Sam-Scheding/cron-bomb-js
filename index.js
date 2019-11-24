@@ -6,21 +6,36 @@ const explode = ({
   data = {},
   field = 'cron',
   exclude = [],
+  sorted = false, // TODO: This doesn't do anything
 }) => {
 
   // TODO: Use a reduce instead
   let output = [];
-  let interval = parser.parseExpression(data[field], {currentDate: start});
+  // Allow users to pass in a single cron string, or an array of multiple cron strings
+  let crons = [].concat(source[field]);
 
-  let d = interval.next();
-  let instance = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()));
+  crons.forEach((cron) => {
+    const options = {
+      currentDate: start,
+      endDate: end,
+      utc: true,
+    };
+    let interval = parser.parseExpression(cron, options);
+    let current;
 
-  while(instance <= end){
-    let skip = false;
-    exclude.forEach(date => {
-      if(date.getTime() === instance.getTime()){ skip = true; }
-    });
-    if(skip){ continue; }
+    while(true){
+      try {
+        current = interval.next()._date;
+        if(skip(current, exclude)){ continue; }
+        output.push({
+          ...source,
+          [field]: current,
+        })
+      } catch (err) {
+        break;
+      }
+    }
+  });
 
     output.push({
       ...data,
@@ -29,8 +44,15 @@ const explode = ({
     d = interval.next();
     instance = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDay(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()));
 
-  }
   return output;
+}
+
+const skip = (current, exclude) => {
+  exclude.forEach(date => {
+    console.log("if ", date, " === ", current.toDate());
+    if(date.getTime() === current.toDate().getTime()){ return true; }
+  });
+  return false;
 }
 
 const intersection = ({
@@ -43,9 +65,12 @@ const intersection = ({
   const dates1 = explode({data: {cron: cron1}, start, end});
   const dates2 = explode({data: {cron: cron2}, start, end});
   const intersection = [];
+
   // TODO: This is n^2. Come up with a better way to do this.
   dates1.forEach((date1) => {
     dates2.forEach((date2) => {
+
+      // Since this isn't a Set, it has the potential for duplicates
       if(date1.cron.getTime() === date2.cron.getTime()){ intersection.push(date1.cron); }
     })
   })

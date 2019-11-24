@@ -27,22 +27,19 @@ Cron-bomb is similar to option 2, in that it can describe an infinite series of 
 
 # Usage
 
-
 ## Basic Usage
 
 ```
   import { explode } from 'cron-bomb';
 
-  const start = new Date('October 1, 2019');
-  const end = new Date('October 8, 2019');
+  const start = new Date(2020, 0, 1, 0, 0);
+  const end = new Date(2020, 0, 8, 0, 0);
   const source = {
     title: 'Lord Of The Fries',
     cron: '10 0 * * 1-5', // Every weekday at 11am
-    duration: 12, // Closes at 11pm
   };
 
-  const debris = explode({start, end, source});
-
+  const debris = explode({source, start, end})
   console.log(JSON.stringify(debris, null, 2));
 ```
 
@@ -52,33 +49,28 @@ This will print the following:
 [
   {
     "title": "Lord Of The Fries",
-    "cron": "2019-10-01T14:10:00.000Z",
-    "duration": 12
+    "cron": "2020-01-01T00:10:00.000Z"
   },
   {
     "title": "Lord Of The Fries",
-    "cron": "2019-10-02T14:10:00.000Z",
-    "duration": 12
+    "cron": "2020-01-02T00:10:00.000Z"
   },
   {
     "title": "Lord Of The Fries",
-    "cron": "2019-10-03T14:10:00.000Z",
-    "duration": 12
+    "cron": "2020-01-03T00:10:00.000Z"
   },
   {
     "title": "Lord Of The Fries",
-    "cron": "2019-10-06T13:10:00.000Z",
-    "duration": 12
+    "cron": "2020-01-06T00:10:00.000Z"
   },
   {
     "title": "Lord Of The Fries",
-    "cron": "2019-10-07T13:10:00.000Z",
-    "duration": 12
+    "cron": "2020-01-07T00:10:00.000Z"
   }
 ]
 ```
 
-Notice that the 4th and 5th of October we skipped, because these were not weekdays.
+Notice that the 4th and 5th of January, 2020 were skipped because these are not weekdays.
 
 ## Custom field name
 
@@ -87,16 +79,14 @@ By default, `cron-bomb` will look for a field called `cron` and use that. Howeve
 ```
   import { explode } from 'cron-bomb';
 
-  const start = new Date('October 1, 2019');
-  const end = new Date('October 8, 2019');
+  const start = new Date(2020, 0, 1, 0, 0);
+  const end = new Date(2020, 0, 8, 0, 0);
   const source = {
     title: 'Lord Of The Fries',
     foo: '10 0 * * 1-5', // Every weekday at 11am
-    duration: 12, // Closes at 11pm
   };
 
-  const debris = explode({start, end, source, field: 'foo'});
-
+  const debris = explode({source, start, end, field: 'foo'})
   console.log(JSON.stringify(debris, null, 2));
 
 ```
@@ -107,28 +97,23 @@ The fieldname will be reflected in the output array as well:
 [
   {
     "title": "Lord Of The Fries",
-    "foo": "2019-10-01T14:10:00.000Z",
-    "duration": 12
+    "foo": "2020-01-01T00:10:00.000Z"
   },
   {
     "title": "Lord Of The Fries",
-    "foo": "2019-10-02T14:10:00.000Z",
-    "duration": 12
+    "foo": "2020-01-02T00:10:00.000Z"
   },
   {
     "title": "Lord Of The Fries",
-    "foo": "2019-10-03T14:10:00.000Z",
-    "duration": 12
+    "foo": "2020-01-03T00:10:00.000Z"
   },
   {
     "title": "Lord Of The Fries",
-    "foo": "2019-10-06T13:10:00.000Z",
-    "duration": 12
+    "foo": "2020-01-06T00:10:00.000Z"
   },
   {
     "title": "Lord Of The Fries",
-    "foo": "2019-10-07T13:10:00.000Z",
-    "duration": 12
+    "foo": "2020-01-07T00:10:00.000Z"
   }
 ]
 ```
