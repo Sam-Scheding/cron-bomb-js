@@ -20,6 +20,9 @@ const explode = ({
       endDate: end,
       utc: false,
     };
+    if(!event.hasOwnProperty(field)){
+      throw new ReferenceError(`'${field}' field not present in data object.`);
+    }
     let interval = parser.parseExpression(event[field], options);
     let current;
 
@@ -29,9 +32,11 @@ const explode = ({
       try {
         current = interval.next()._date;
         if(skip(current, exclude)){ continue; }
+        console.log(current)
         output.push({
           ...event,
-          [field]: current,
+          // [field]: `${current._i}`,
+          [field]: current._i.toISOString(),
         })
       } catch (err) {
         break;
