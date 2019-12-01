@@ -1,11 +1,12 @@
 var parser = require('cron-parser');
 
 const explode = ({
-  start = Date.now(),
-  end = Date.now(),
+  start = new Date(),
+  end = new Date(),
   data = {},
   field = 'cron',
   exclude = [],
+  utc = false,
   sorted = false, // TODO: This doesn't do anything
 }) => {
 
@@ -13,15 +14,17 @@ const explode = ({
   let output = [];
   // Allow users to pass in a single crontab, or an array of multiple cron tabs
   let events = [].concat(data);
-
+  if(start.getTime() > end.getTime()){
+    throw RangeError(`Start of datetime range cannot be later than end of datetime range`);
+  }
   events.forEach((event) => {
     const options = {
       currentDate: start,
       endDate: end,
-      utc: false,
+      utc,
     };
     if(!event.hasOwnProperty(field)){
-      throw new ReferenceError(`'${field}' field not present in data object.`);
+      throw ReferenceError(`'${field}' field not present in data object.`);
     }
     let interval = parser.parseExpression(event[field], options);
     let current;
@@ -30,27 +33,28 @@ const explode = ({
     // this is the preferred way of using cron-parser for some reason *shrug*
     while(true){
       try {
-        current = interval.next()._date;
+        current = interval.next()._date.toDate(); // cron parser returns a moment object
         if(skip(current, exclude)){ continue; }
-        console.log(current)
         output.push({
           ...event,
-          // [field]: `${current._i}`,
-          [field]: current._i.toISOString(),
+          [field]: current.toISOString(),
         })
+
       } catch (err) {
         break;
       }
     }
   });
+
   return output;
 }
 
 const skip = (current, exclude) => {
-  exclude.forEach(date => {
-    if(date.getTime() === current.toDate().getTime()){ return true; }
-  });
-  return false;
+  /*
+    The the exclude param is an array of ISO date strings (e.g. 2020-01-03T00:10:00.000Z)
+    not an array of JS Dates. This is because a DB will usually store dates like this.
+  */
+  return !!exclude.find(date => {return new Date(date).getTime() === current.getTime()});
 }
 
 const intersection = ({
