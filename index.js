@@ -51,7 +51,7 @@ const explode = ({
 
 const skip = (current, exclude) => {
   /*
-    The the exclude param is an array of ISO date strings (e.g. 2020-01-03T00:10:00.000Z)
+    The the exclude param is an array of ISO date strings (e.g. '2020-01-03T00:10:00.000Z')
     not an array of JS Dates. This is because a DB will usually store dates like this.
   */
   return !!exclude.find(date => {return new Date(date).getTime() === current.getTime()});
@@ -67,13 +67,12 @@ const intersection = ({
   const dates1 = explode({data: {cron: cron1}, start, end});
   const dates2 = explode({data: {cron: cron2}, start, end});
   const intersection = [];
-
   // TODO: This is n^2. Come up with a better way to do this.
   dates1.forEach((date1) => {
     dates2.forEach((date2) => {
 
       // Since this isn't a Set, it has the potential for duplicates
-      if(date1.cron.getTime() === date2.cron.getTime()){ intersection.push(date1.cron); }
+      if(new Date(date1.cron).getTime() === new Date(date2.cron).getTime()){ intersection.push(date1.cron); }
     })
   })
 

@@ -155,5 +155,20 @@ describe('explode()', () => {
     const received = cronBomb.explode({data, start, end, exclude, utc:true});
     expect(received).toEqual(expected);
   });
+});
 
+describe('intersection()', () => {
+  it('gives the correct intersection of two crontabs', () => {
+    const start = new Date('01 January 2020 00:00 UTC');
+    const end = new Date('08 January 2020 00:00 UTC');
+    const expected =    [
+      '2020-01-01T13:10:00.000Z',
+      '2020-01-02T13:10:00.000Z',
+      '2020-01-05T13:10:00.000Z',
+      '2020-01-06T13:10:00.000Z',
+      '2020-01-07T13:10:00.000Z'
+    ];
+    const received = cronBomb.intersection({cron1: '10 0 * * 1-5', cron2: '10 0 * * 1-5', start, end});
+    expect(received).toEqual(expected);
+  });
 });
