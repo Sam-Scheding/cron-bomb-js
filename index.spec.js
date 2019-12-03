@@ -16,7 +16,7 @@ describe('explode()', () => {
       { title: 'Lord Of The Fries', cron: '2020-01-06T00:10:00.000Z' },
       { title: 'Lord Of The Fries', cron: '2020-01-07T00:10:00.000Z' }
     ];
-    const received = cronBomb.explode({data, start, end, utc:true});
+    const received = cronBomb.explode(data, {start, end, utc:true});
     expect(received).toEqual(expected);
   });
 
@@ -45,7 +45,7 @@ describe('explode()', () => {
       { title: 'Shift Eatery', cron: '2020-01-06T00:10:00.000Z' },
       { title: 'Shift Eatery', cron: '2020-01-07T00:10:00.000Z' }
     ];
-    const received = cronBomb.explode({data, start, end, utc:true});
+    const received = cronBomb.explode(data, {start, end, utc:true});
     expect(received).toEqual(expected);
   });
 
@@ -54,7 +54,7 @@ describe('explode()', () => {
       'nocronfield': '1 1 * * 0',
     }
     expect(() => {
-      cronBomb.explode({data});
+      cronBomb.explode(data, {});
     }).toThrow(ReferenceError);
 
   });
@@ -72,7 +72,7 @@ describe('explode()', () => {
     // the cronparser library, not cronbomb, so I don't have much control over
     // it.
     expect(() => {
-      cronBomb.explode({start, end, data});
+      cronBomb.explode(data, {start, end});
     }).toThrow(Error);
 
   });
@@ -93,7 +93,7 @@ describe('explode()', () => {
       { title: 'Lord Of The Fries', [field]: '2020-01-06T00:10:00.000Z' },
       { title: 'Lord Of The Fries', [field]: '2020-01-07T00:10:00.000Z' }
     ];
-    const received = cronBomb.explode({data, start, end, field, utc:true});
+    const received = cronBomb.explode(data, {start, end, field, utc:true});
     expect(received).toEqual(expected);
   });
 
@@ -106,7 +106,7 @@ describe('explode()', () => {
     };
 
     expect(() => {
-      cronBomb.explode({start, end, data});
+      cronBomb.explode(data, {start, end});
     }).toThrow(RangeError);
   });
 
@@ -127,7 +127,7 @@ describe('explode()', () => {
     const expected = [
       { title: 'Lord Of The Fries', cron: '2020-01-01T00:10:00.000Z' },
     ];
-    const received = cronBomb.explode({data, start, end, exclude, utc:true});
+    const received = cronBomb.explode(data, {start, end, exclude, utc:true});
     expect(received).toEqual(expected);
   });
 
@@ -152,7 +152,7 @@ describe('explode()', () => {
       { title: 'Lord Of The Fries', cron: '2020-01-06T00:10:00.000Z' },
       { title: 'Lord Of The Fries', cron: '2020-01-07T00:10:00.000Z' }
     ];
-    const received = cronBomb.explode({data, start, end, exclude, utc:true});
+    const received = cronBomb.explode(data, {start, end, exclude, utc:true});
     expect(received).toEqual(expected);
   });
 });

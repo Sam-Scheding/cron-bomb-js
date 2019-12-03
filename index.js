@@ -1,6 +1,6 @@
 var parser = require('cron-parser');
 
-const explode = (data = {}, {
+const explode = (data, {
   start = new Date(),
   end = new Date(),
   field = 'cron',
@@ -63,8 +63,8 @@ const intersection = ({
   end = new Date(),
 }) => {
 
-  const dates1 = explode({data: {cron: cron1}, start, end});
-  const dates2 = explode({data: {cron: cron2}, start, end});
+  const dates1 = explode({cron: cron1}, {start, end});
+  const dates2 = explode({cron: cron2}, {start, end});
   const intersection = [];
   // TODO: This is n^2. Come up with a better way to do this.
   dates1.forEach((date1) => {
