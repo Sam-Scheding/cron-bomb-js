@@ -27,6 +27,23 @@ Cron-bomb is similar to option 2, in that it can describe an infinite series of 
 
 # Usage
 
+# Parameters
+
+## explode()
+
+| Parameter        | Description                                                                                                                                                                       | Default    |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| data            | An object (or array of objects) with a 'cron' key.  Any other key:value pairs present in the data param  will be persisted in the output.                                         | {}         |
+| options.start   | A JS Date object representing the beginning of the date range to explode.                                                                                                         | new Date() |
+| options.end,    | A JS Date object representing the beginning of the date range to explode.                                                                                                         | New Date() |
+| options.field   | The field in 'data' to check for a crontab                                                                                                                                        | 'cron'     |
+| options.exclude | An array of JS Date objects. Objects matching these dates  will not be present in the exploded array.                                                                             | []         |
+| options.utc     | Whether to explode the dates in UTC time or in the current  timezone                                                                                                              | false      |
+| options.sorted  | If an array of objects is passed into the data param, the output will be ordered by their place in the input array. If sorted is  set to true, the output will be sorted by Date. | false      |
+
+## intersection()
+
+
 ## Basic Usage
 
 ```
