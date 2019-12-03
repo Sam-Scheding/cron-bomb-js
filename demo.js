@@ -8,5 +8,5 @@ const data = {
 };
 
 const cancelledEvents = [new Date(Date.UTC(2020, 0, 1, 0, 0))];
-const debris = cronBomb.explode({start, end, data, exclude: cancelledEvents});
+const debris = cronBomb.explode(data, {start, end, exclude: cancelledEvents});
 console.log(JSON.stringify(debris, null, 2));

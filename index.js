@@ -1,9 +1,8 @@
 var parser = require('cron-parser');
 
-const explode = ({
+const explode = (data = {}, {
   start = new Date(),
   end = new Date(),
-  data = {},
   field = 'cron',
   exclude = [],
   utc = false,
