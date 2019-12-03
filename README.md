@@ -39,7 +39,7 @@ Cron-bomb is similar to option 2, in that it can describe an infinite series of 
     cron: '10 0 * * 1-5', // Every weekday at 11am
   };
 
-  const debris = explode({data, start, end})
+  const debris = explode(data, {start, end})
   console.log(JSON.stringify(debris, null, 2));
 ```
 
@@ -88,7 +88,8 @@ By default, `cron-bomb` will look for a field called `cron` and use that. Howeve
     foo: '10 0 * * 1-5', // Every weekday at 11am
   };
 
-  const debris = explode({data, start, end, field: 'foo'})
+  const debris = explode(data, {start, end, field: 'foo'})
+
   console.log(JSON.stringify(debris, null, 2));
 
 ```
@@ -137,7 +138,7 @@ const data = [{
   cron: '10 0 * * 1-5', // Every weekday at 11am
 }];
 
-const debris = explode({start, end, data, exclude: cancelledEvents});
+const debris = explode(data, {start, end});
 console.log(JSON.stringify(debris, null, 2));
 
 ```
@@ -181,7 +182,7 @@ const data = {
 };
 
 const cancelledEvents = [new Date('2019-10-07T13:10:00.000Z')];
-const debris = explode({start, end, data, exclude: cancelledEvents});
+const debris = explode(data, {start, end, exclude: cancelledEvents});
 console.log(JSON.stringify(debris, null, 2));
 ```
 
