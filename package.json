@@ -16,8 +16,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "clean": "rm -rf dist",
-    "prepublishOnly": "npm run clean && npm run build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "prepublishOnly": "npm run clean && npm run build && node -e \"require('fs').accessSync('dist/index.js')\"",
     "test": "jest --coverage",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint .",
