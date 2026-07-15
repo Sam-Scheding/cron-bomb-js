@@ -24,7 +24,8 @@ git pull
 | Backwards-compatible feature or types | **minor** | `1.0.0` → `1.1.0` |
 | Bug fix, docs-only (if you version docs), chores that don’t change API | **patch** | `1.0.0` → `1.0.1` |
 
-First TypeScript / stable-API cut from `0.1.0` → **`1.0.0`** (major).
+First TypeScript / stable-API cut from `0.1.0`: prefer a version that is **not already on the registry**.
+Check with `npm view cron-bomb versions`. Historically `1.0.0` / `1.0.1` were already published (old JS package); use **`2.0.0`** (or another free version) for this release.
 
 Draft release notes from `git log <previous-tag>..HEAD` (or merge-base) covering: breaking changes, features, fixes, migration tips.
 
@@ -40,17 +41,21 @@ npm test
 npm run build
 ```
 
-Confirm the pack contents look right (should be `package.json` + `dist/**` only, no `src/`):
+Confirm the pack contents look right (should include `package.json`, `README.md`, and `dist/**` — **not** `src/` alone):
 
 ```bash
 npm pack --dry-run
 ```
+
+If the tarball lists only `package.json` + `README.md`, the build did not emit `dist/` (often because `clean` removed `dist` but left `tsconfig.tsbuildinfo`, so `tsc` skipped emit). Run `npm run clean && npm run build` and dry-run again before publishing.
 
 Optional: inspect what would publish without uploading:
 
 ```bash
 npm publish --dry-run
 ```
+
+**Do not publish** if `dist/index.js` is missing from the dry-run listing.
 
 ## Bump version and tag
 

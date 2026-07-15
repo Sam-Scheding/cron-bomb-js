@@ -1,6 +1,6 @@
 {
   "name": "cron-bomb",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A TypeScript-first library for generating recurring events from cron expressions.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,8 +16,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "clean": "rm -rf dist",
-    "prepublishOnly": "npm run clean && npm run build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "prepublishOnly": "npm run clean && npm run build && node -e \"require('fs').accessSync('dist/index.js')\"",
     "test": "jest --coverage",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint .",
