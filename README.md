@@ -21,7 +21,7 @@ pnpm add cron-bomb
 yarn add cron-bomb
 ```
 
-Requires Node.js 16+.
+Requires Node.js 18+ (required by `cron-parser` v5).
 
 ## Quick start
 

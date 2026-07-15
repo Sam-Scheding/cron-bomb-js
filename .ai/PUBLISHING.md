@@ -7,7 +7,7 @@ Manual release process for `cron-bomb` (no Changesets). Package is published to 
 - [ ] Maintainer access to the [npm package](https://www.npmjs.com/package/cron-bomb) (`npm whoami` succeeds for that account)
 - [ ] Push access to `https://github.com/Sam-Scheding/cron-bomb-js`
 - [ ] Clean working tree on the release branch (usually `master`), synced with remote
-- [ ] Node.js ≥ 16
+- [ ] Node.js ≥ 18
 
 ```bash
 npm whoami

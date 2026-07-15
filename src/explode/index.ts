@@ -1,4 +1,4 @@
-import parser from "cron-parser";
+import { CronExpressionParser } from "cron-parser";
 import { ExplodedEvent, ExplodeOptions } from "../types";
 import { shouldSkip } from "../utils/should-skip";
 import { toExcludedTimes } from "../utils/to-excluded-times";
@@ -31,8 +31,8 @@ import { toExcludedTimes } from "../utils/to-excluded-times";
  * @param options.field - Property name for the crontab. Defaults to `"cron"`.
  * @param options.exclude - Occurrences to omit. Accepts `Date`s and/or ISO
  *   strings (both are normalized to epoch ms). Matching is exact-millisecond.
- * @param options.utc - When `true`, evaluate the cron in UTC; otherwise use the
- *   local timezone. Defaults to `false`.
+ * @param options.utc - When `true`, evaluate the cron in UTC (`tz: "UTC"`);
+ *   otherwise use the local timezone. Defaults to `false`.
  * @param options.sorted - Reserved for future date-sorted output. Currently ignored.
  *
  * @returns An array of event copies with the crontab field replaced by ISO
@@ -86,26 +86,21 @@ export function explode<
       throw new ReferenceError(`'${field}' field not present in data object.`);
     }
 
-    const interval = parser.parseExpression(String(event[field]), {
+    const interval = CronExpressionParser.parse(String(event[field]), {
       currentDate: start,
       endDate: end,
-      utc,
+      ...(utc ? { tz: "UTC" } : {}),
     });
 
-    // cron-parser signals end-of-range by throwing from next()
-    while (true) {
-      try {
-        const current = interval.next().toDate();
-        if (shouldSkip(current, excludedTimes)) {
-          continue;
-        }
-        output.push({
-          ...event,
-          [field]: current.toISOString(),
-        } as ExplodedEvent<T, F>);
-      } catch {
-        break;
+    while (interval.hasNext()) {
+      const current = interval.next().toDate();
+      if (shouldSkip(current, excludedTimes)) {
+        continue;
       }
+      output.push({
+        ...event,
+        [field]: current.toISOString(),
+      } as ExplodedEvent<T, F>);
     }
   }
 

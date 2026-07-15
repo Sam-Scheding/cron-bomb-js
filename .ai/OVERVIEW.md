@@ -33,10 +33,11 @@ Explodes both cron strings over the same range, then returns ISO strings present
 
 ## Implementation notes
 
-- Depends on `[cron-parser](https://www.npmjs.com/package/cron-parser)` v2 (`parseExpression` + `next().toDate()`). End-of-range is detected by catching the throw from `next()` (cron-parser’s iteration style).
+- Depends on [`cron-parser`](https://www.npmjs.com/package/cron-parser) v5 (`CronExpressionParser.parse` + `hasNext()` / `next().toDate()`). `utc: true` maps to `tz: "UTC"`.
 - Timezone sensitivity: without `utc: true`, results depend on local TZ. Tests pin UTC for determinism.
-- Exclusion matching is exact `getTime()` equality after `new Date(...)` — format/offset mismatches will not exclude.
+- Exclusion matching is exact `getTime()` equality after normalizing via `toExcludedTimes`.
 - Multipass arrays are concatenated per event (event A’s dates, then event B’s), not interleaved by date.
+- Range window is `(start, end]`: occurrence exactly on `start` is skipped; exactly on `end` is included.
 
 ## Mental model for agents
 
