@@ -1,243 +1,171 @@
-# Description
+# cron-bomb
 
-A simple and succinct JavaScript library for generating recurring events from a single object.
+[![npm version](https://img.shields.io/npm/v/cron-bomb.svg)](https://www.npmjs.com/package/cron-bomb)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
-Often it is necessary to manage recurring events. Keeping track of public holidays, managing recurring bookings for your clients, or recording the opening hours of businesses all require a solution to this problem.
+TypeScript-first helper for turning recurring event objects (described by [cron](https://crontab.guru/) expressions) into concrete occurrences over a date range.
 
-## Current ways to manage recurring dates
+Store a single crontab on your event (opening hours, bookings, reminders) and expand it only when you need a finite list — including cancellations (`exclude`) and schedule overlap checks (`intersection`).
 
-### Option 1:
-The naive way to solve this problem is to explicitly generate an object for every occurrence and store all generated objects in a database. Of course, there are infinitely many events, so this process must be chunked into blocks of, let's say 6 months, and then 6 months later the process must be repeated. This is very manual, takes up a lot of space in your db, and is expensive to send over a network.
+## Install
 
-### Option 2:
-Another solution is to create a second database model that keeps track of how often the event should repeat. It generally has fields like `second`, `minute`, `hour`, `day`, `month`, `year` to represent how often to repeat. This object is then referenced by the event object with a foreign key or similar. This also has some drawbacks. For example, it becomes difficult to describe events that repeat the third Saturday of every month.
-
-## Enter cron-bomb
-
-Cron-bomb is similar to option 2, in that it can describe an infinite series of repeating events. However, it offers a number of additional advantages:
-
-  - It can simply describe a richer variety of recurring events, like every weekday, or every third Saturday of the month.
-  - It doesn't need an extra database model, or foreign keys. It can be represented by a single field in your current model.
-  - It's even less expensive to send over a network.
-  - Provides inbuilt ways of tracking things like cancelled appointments, and booking clashes.
-
-# Installation
-
-`$ npm install cron-bomb --save`
-
-# Usage
-
-# Parameters
-
-## explode()
-
-| Parameter        | Description                                                                                                                                                                       | Default    |
-|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| data            | An object (or array of objects) with a 'cron' key.  Any other key:value pairs present in the data param  will be persisted in the output.                                         | {}         |
-| options.start   | A JS Date object representing the beginning of the date range to explode.                                                                                                         | new Date() |
-| options.end,    | A JS Date object representing the beginning of the date range to explode.                                                                                                         | New Date() |
-| options.field   | The field in 'data' to check for a crontab                                                                                                                                        | 'cron'     |
-| options.exclude | An array of JS Date objects. Objects matching these dates  will not be present in the exploded array.                                                                             | []         |
-| options.utc     | Whether to explode the dates in UTC time or in the current  timezone                                                                                                              | false      |
-| options.sorted  | If an array of objects is passed into the data param, the output will be ordered by their place in the input array. If sorted is  set to true, the output will be sorted by Date. | false      |
-
-## intersection()
-
-
-## Basic Usage
-
-```
-  import { explode } from 'cron-bomb';
-
-  const start = new Date(2020, 0, 1, 0, 0);
-  const end = new Date(2020, 0, 8, 0, 0);
-  const data = {
-    title: 'Lord Of The Fries',
-    cron: '10 0 * * 1-5', // Every weekday at 11am
-  };
-
-  const debris = explode(data, {start, end})
-  console.log(JSON.stringify(debris, null, 2));
+```bash
+npm install cron-bomb
 ```
 
-This will print the following:
-
+```bash
+pnpm add cron-bomb
 ```
-[
+
+```bash
+yarn add cron-bomb
+```
+
+Requires Node.js 16+.
+
+## Quick start
+
+```ts
+import { explode } from "cron-bomb";
+
+const start = new Date("2020-01-01T00:00:00.000Z");
+const end = new Date("2020-01-08T00:00:00.000Z");
+
+const occurrences = explode(
   {
-    "title": "Lord Of The Fries",
-    "cron": "2020-01-01T00:10:00.000Z"
+    title: "Weekday standup",
+    cron: "0 9 * * 1-5",
   },
-  {
-    "title": "Lord Of The Fries",
-    "cron": "2020-01-02T00:10:00.000Z"
-  },
-  {
-    "title": "Lord Of The Fries",
-    "cron": "2020-01-03T00:10:00.000Z"
-  },
-  {
-    "title": "Lord Of The Fries",
-    "cron": "2020-01-06T00:10:00.000Z"
-  },
-  {
-    "title": "Lord Of The Fries",
-    "cron": "2020-01-07T00:10:00.000Z"
-  }
-]
+  { start, end, utc: true },
+);
+
+// [
+//   { title: "Weekday standup", cron: "2020-01-01T09:00:00.000Z" },
+//   { title: "Weekday standup", cron: "2020-01-02T09:00:00.000Z" },
+//   ...
+// ]
 ```
 
-So, what just happened? Basically, we just asked `cron-bomb` to give us a list of all dates between
-2020-01-01 and 2020-01-07 that match `10 0 * * 1-5`. Notice that the 4th and 5th of January, 2020 were skipped because these are not weekdays. An array was then returned where each element is an object that looks a lot like the original object that we passed in, except the `cron` value has been replaced with a Date.
+Prefer `utc: true` unless you intentionally want the process local timezone.
 
+## API
 
-## Custom field name
-
-By default, `cron-bomb` will look for a field called `cron` and use that. However, it's possible to specify any field name you want by adding it to the options:
-
-```
-  import { explode } from 'cron-bomb';
-
-  const start = new Date(2020, 0, 1, 0, 0);
-  const end = new Date(2020, 0, 8, 0, 0);
-  const data = {
-    title: 'Lord Of The Fries',
-    foo: '10 0 * * 1-5', // Every weekday at 11am
-  };
-
-  const debris = explode(data, {start, end, field: 'foo'})
-
-  console.log(JSON.stringify(debris, null, 2));
-
+```ts
+import {
+  explode,
+  intersection,
+  type ExplodeOptions,
+  type ExplodedEvent,
+  type IntersectionOptions,
+} from "cron-bomb";
 ```
 
-The field name will be reflected in the output array as well:
+### `explode(data, options?)`
 
-```
-[
-  {
-    "title": "Lord Of The Fries",
-    "foo": "2020-01-01T00:10:00.000Z"
-  },
-  {
-    "title": "Lord Of The Fries",
-    "foo": "2020-01-02T00:10:00.000Z"
-  },
-  {
-    "title": "Lord Of The Fries",
-    "foo": "2020-01-03T00:10:00.000Z"
-  },
-  {
-    "title": "Lord Of The Fries",
-    "foo": "2020-01-06T00:10:00.000Z"
-  },
-  {
-    "title": "Lord Of The Fries",
-    "foo": "2020-01-07T00:10:00.000Z"
-  }
-]
+Expand one event object (or an array of them) into occurrence rows for `(start, end]`.
+
+Each input must include a crontab string (default field name `"cron"`). Every other property is copied onto each result. The crontab field is replaced with an ISO 8601 timestamp (`Date#toISOString()`) per occurrence.
+
+```ts
+explode(data, {
+  start?: Date; // default: new Date()
+  end?: Date; // default: new Date()
+  field?: string; // crontab property name; default: "cron"
+  exclude?: Array<Date | string>; // exact-ms cancellations
+  utc?: boolean; // default: false (local TZ)
+  sorted?: boolean; // reserved; not implemented yet
+});
 ```
 
-## Passing multiple objects to explode
-`cron-bomb` accepts either an Object, or an Array as input for the `data` option. This means you can easily explode multiple objects at once:
+**Behavior notes**
 
-```
-import { explode } from 'cron-bomb';
+| Topic | Behavior |
+| --- | --- |
+| Array input | Events are expanded in input order and concatenated (all of A, then all of B). Not interleaved by date. |
+| `exclude` | `Date` and/or ISO strings; compared by exact epoch millisecond. |
+| Custom `field` | Reads that property for the crontab and writes ISO timestamps back to the same key. |
+| Timezone | `utc: true` evaluates in UTC; `false` uses the runtime local timezone. |
+| Range bounds | An occurrence exactly equal to `start` is skipped (iteration starts after `currentDate`). An occurrence exactly equal to `end` is included. |
+| Errors | `RangeError` if `start > end`; `ReferenceError` if the crontab field is missing; invalid cron throws from [`cron-parser`](https://www.npmjs.com/package/cron-parser). |
 
-const start = new Date(Date.UTC(2020, 0, 1, 0, 0));
-const end = new Date(Date.UTC(2020, 0, 3, 0, 0));
-const data = [{
-  title: 'Lord Of The Fries',
-  cron: '10 0 * * 1-5', // Every weekday at 11am
-},
-{
-  title: 'Lords Of The Fry',
-  cron: '10 0 * * 1-5', // Every weekday at 11am
-}];
+**Custom field**
 
-const debris = explode(data, {start, end});
-console.log(JSON.stringify(debris, null, 2));
-
-```
-This returns the following:
-```
-[
-  {
-    "title": "Lord Of The Fries",
-    "cron": "2020-01-01T00:10:00.000Z"
-  },
-  {
-    "title": "Lord Of The Fries",
-    "cron": "2020-01-02T00:10:00.000Z"
-  },
-  {
-    "title": "Lords Of The Fry",
-    "cron": "2020-01-01T00:10:00.000Z"
-  },
-  {
-    "title": "Lords Of The Fry",
-    "cron": "2020-01-02T00:10:00.000Z"
-  }
-]
+```ts
+explode(
+  { title: "Shift", schedule: "10 0 * * 1-5" },
+  { start, end, field: "schedule", utc: true },
+);
+// => [{ title: "Shift", schedule: "2020-01-01T00:10:00.000Z" }, ...]
 ```
 
-Note that the returned array is ordered in regards to the elements in the array that was passed in, not by date. A `sortable` option which will use insertion sort to sort the array by date is in development and will be available in a future version. This will be more efficient than sorting the array after it is returned, but for now, it is relatively trivial to sort the returned array by date.
+**Cancellations**
 
-## Excluding Particular dates
-
-A common use case might be that an event is meant to repeat every week, but due to unforeseen circumstances, particular instances have been cancelled. For this, you can pass an array of excluded dates to `cron-bomb` and they will be skipped in the returned array:
-
-```
-import { explode } from 'cron-bomb';
-
-const start = new Date('October 1, 2019');
-const end = new Date('October 8, 2019');
-const data = {
-  title: 'Lord Of The Fries',
-  cron: '10 0 * * 1-5', // Every weekday at 11am
-  duration: 12, // Closes at 11pm
-};
-
-const cancelledEvents = [new Date('2019-10-07T13:10:00.000Z')];
-const debris = explode(data, {start, end, exclude: cancelledEvents});
-console.log(JSON.stringify(debris, null, 2));
+```ts
+explode(event, {
+  start,
+  end,
+  utc: true,
+  exclude: [
+    "2020-01-02T00:10:00.000Z",
+    new Date("2020-01-03T00:10:00.000Z"),
+  ],
+});
 ```
 
-```
-[
-  {
-    "title": "Lord Of The Fries",
-    "cron": "2019-10-01T14:10:00.000Z",
-    "duration": 12
-  },
-  {
-    "title": "Lord Of The Fries",
-    "cron": "2019-10-02T14:10:00.000Z",
-    "duration": 12
-  },
-  {
-    "title": "Lord Of The Fries",
-    "cron": "2019-10-03T14:10:00.000Z",
-    "duration": 12
-  },
-  {
-    "title": "Lord Of The Fries",
-    "cron": "2019-10-06T13:10:00.000Z",
-    "duration": 12
-  }
-]
+### `intersection(options)`
+
+Return ISO timestamps that appear in **both** crontab schedules within a range. Useful for clash detection (e.g. recurring booking vs public holiday).
+
+```ts
+intersection({
+  cron1: string;
+  cron2: string;
+  start?: Date;
+  end?: Date;
+  utc?: boolean;
+}): string[];
 ```
 
-Note that the last day is now being skipped.
-
-## Intersections
-
-Another common use case is that you have two streams of recurring events and want see if they ever overlap. For example, this might be a booking that repeats weekly unless it's a public holiday. `cron-bomb` supplies functionality to help you do that:
-
+```ts
+const overlaps = intersection({
+  cron1: "0 9 * * 1-5",
+  cron2: "0 9 * * 1", // Mondays
+  start: new Date("2020-01-01T00:00:00.000Z"),
+  end: new Date("2020-01-31T00:00:00.000Z"),
+  utc: true,
+});
+// => ["2020-01-06T09:00:00.000Z", "2020-01-13T09:00:00.000Z", ...]
 ```
 
+Results follow `cron1`’s expansion order. Returns only timestamp strings, not full event objects.
+
+## Cron syntax
+
+Standard five-field cron expressions as understood by [cron-parser](https://www.npmjs.com/package/cron-parser). Helpful editor: [crontab.guru](https://crontab.guru/).
+
+## Development
+
+```bash
+git clone https://github.com/Sam-Scheding/cron-bomb-js.git
+cd cron-bomb-js
+npm install
+npm test
+npm run build
 ```
 
-# Help with crontab syntax
+| Script | Description |
+| --- | --- |
+| `npm test` | Run Jest + coverage |
+| `npm run build` | Emit `dist/` (JS + typings) |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier |
 
-https://crontab.guru/
+## License
+
+[ISC](https://opensource.org/licenses/ISC) © Sam Scheding
+
+## Links
+
+- [npm package](https://www.npmjs.com/package/cron-bomb)
+- [GitHub repository](https://github.com/Sam-Scheding/cron-bomb-js)
+- [Issue tracker](https://github.com/Sam-Scheding/cron-bomb-js/issues)
