@@ -1,6 +1,7 @@
 import parser from "cron-parser";
 import { ExplodedEvent, ExplodeOptions } from "../types";
 import { shouldSkip } from "../utils/should-skip";
+import { toExcludedTimes } from "../utils/to-excluded-times";
 
 /**
  * Expand one or more cron-bearing event objects into concrete occurrences
@@ -24,8 +25,8 @@ import { shouldSkip } from "../utils/should-skip";
  * @param options.start - Start of the range (inclusive). Defaults to `new Date()`.
  * @param options.end - End of the range. Defaults to `new Date()`.
  * @param options.field - Property name for the crontab. Defaults to `"cron"`.
- * @param options.exclude - Dates (as `Date` or ISO strings) to omit from the
- *   result. Matching uses exact millisecond equality.
+ * @param options.exclude - Occurrences to omit. Accepts `Date`s and/or ISO
+ *   strings (both are normalized to epoch ms). Matching is exact-millisecond.
  * @param options.utc - When `true`, evaluate the cron in UTC; otherwise use the
  *   local timezone. Defaults to `false`.
  * @param options.sorted - Reserved for future date-sorted output. Currently ignored.
@@ -68,6 +69,7 @@ export function explode<
 
   const output: Array<ExplodedEvent<T, F>> = [];
   const events = Array.isArray(data) ? data : [data];
+  const excludedTimes = toExcludedTimes(exclude);
 
   if (start.getTime() > end.getTime()) {
     throw new RangeError(
@@ -90,7 +92,7 @@ export function explode<
     while (true) {
       try {
         const current = interval.next().toDate();
-        if (shouldSkip(current, exclude)) {
+        if (shouldSkip(current, excludedTimes)) {
           continue;
         }
         output.push({
