@@ -1,6 +1,6 @@
 {
   "name": "cron-bomb",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "A TypeScript-first library for generating recurring events from cron expressions.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
