@@ -1,25 +1,27 @@
 # Description
 
-A simple and succinct JavaScript library for generating recurring events from a single object.
+A simple and succinct TypeScript-first library for generating recurring events from a single object.
 
 Often it is necessary to manage recurring events. Keeping track of public holidays, managing recurring bookings for your clients, or recording the opening hours of businesses all require a solution to this problem.
 
 ## Current ways to manage recurring dates
 
 ### Option 1:
+
 The naive way to solve this problem is to explicitly generate an object for every occurrence and store all generated objects in a database. Of course, there are infinitely many events, so this process must be chunked into blocks of, let's say 6 months, and then 6 months later the process must be repeated. This is very manual, takes up a lot of space in your db, and is expensive to send over a network.
 
 ### Option 2:
+
 Another solution is to create a second database model that keeps track of how often the event should repeat. It generally has fields like `second`, `minute`, `hour`, `day`, `month`, `year` to represent how often to repeat. This object is then referenced by the event object with a foreign key or similar. This also has some drawbacks. For example, it becomes difficult to describe events that repeat the third Saturday of every month.
 
 ## Enter cron-bomb
 
 Cron-bomb is similar to option 2, in that it can describe an infinite series of repeating events. However, it offers a number of additional advantages:
 
-  - It can simply describe a richer variety of recurring events, like every weekday, or every third Saturday of the month.
-  - It doesn't need an extra database model, or foreign keys. It can be represented by a single field in your current model.
-  - It's even less expensive to send over a network.
-  - Provides inbuilt ways of tracking things like cancelled appointments, and booking clashes.
+- It can simply describe a richer variety of recurring events, like every weekday, or every third Saturday of the month.
+- It doesn't need an extra database model, or foreign keys. It can be represented by a single field in your current model.
+- It's even less expensive to send over a network.
+- Provides inbuilt ways of tracking things like cancelled appointments, and booking clashes.
 
 # Installation
 
@@ -31,22 +33,21 @@ Cron-bomb is similar to option 2, in that it can describe an infinite series of 
 
 ## explode()
 
-| Parameter        | Description                                                                                                                                                                       | Default    |
-|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| data            | An object (or array of objects) with a 'cron' key.  Any other key:value pairs present in the data param  will be persisted in the output.                                         | {}         |
-| options.start   | A JS Date object representing the beginning of the date range to explode.                                                                                                         | new Date() |
-| options.end,    | A JS Date object representing the beginning of the date range to explode.                                                                                                         | New Date() |
-| options.field   | The field in 'data' to check for a crontab                                                                                                                                        | 'cron'     |
-| options.exclude | An array of JS Date objects. Objects matching these dates  will not be present in the exploded array.                                                                             | []         |
-| options.utc     | Whether to explode the dates in UTC time or in the current  timezone                                                                                                              | false      |
-| options.sorted  | If an array of objects is passed into the data param, the output will be ordered by their place in the input array. If sorted is  set to true, the output will be sorted by Date. | false      |
 
-## intersection()
+| Parameter       | Description                                                                                                                                                                      | Default    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| data            | An object (or array of objects) with a 'cron' key. Any other key:value pairs present in the data param will be persisted in the output.                                          | {}         |
+| options.start   | A JS Date object representing the beginning of the date range to explode.                                                                                                        | new Date() |
+| options.end,    | A JS Date object representing the beginning of the date range to explode.                                                                                                        | New Date() |
+| options.field   | The field in 'data' to check for a crontab                                                                                                                                       | 'cron'     |
+| options.exclude | An array of JS Date objects. Objects matching these dates will not be present in the exploded array.                                                                             | []         |
+| options.utc     | Whether to explode the dates in UTC time or in the current timezone                                                                                                              | false      |
+| options.sorted  | If an array of objects is passed into the data param, the output will be ordered by their place in the input array. If sorted is set to true, the output will be sorted by Date. | false      |
 
 
 ## Basic Usage
 
-```
+```ts
   import { explode } from 'cron-bomb';
 
   const start = new Date(2020, 0, 1, 0, 0);
@@ -89,7 +90,6 @@ This will print the following:
 
 So, what just happened? Basically, we just asked `cron-bomb` to give us a list of all dates between
 2020-01-01 and 2020-01-07 that match `10 0 * * 1-5`. Notice that the 4th and 5th of January, 2020 were skipped because these are not weekdays. An array was then returned where each element is an object that looks a lot like the original object that we passed in, except the `cron` value has been replaced with a Date.
-
 
 ## Custom field name
 
@@ -139,6 +139,7 @@ The field name will be reflected in the output array as well:
 ```
 
 ## Passing multiple objects to explode
+
 `cron-bomb` accepts either an Object, or an Array as input for the `data` option. This means you can easily explode multiple objects at once:
 
 ```
@@ -159,7 +160,9 @@ const debris = explode(data, {start, end});
 console.log(JSON.stringify(debris, null, 2));
 
 ```
+
 This returns the following:
+
 ```
 [
   {
@@ -240,4 +243,4 @@ Another common use case is that you have two streams of recurring events and wan
 
 # Help with crontab syntax
 
-https://crontab.guru/
+[https://crontab.guru/](https://crontab.guru/)
