@@ -11,12 +11,15 @@ import { IntersectionOptions } from "../types";
  *
  * Comparison is by exact millisecond equality of the exploded ISO strings.
  * The current implementation is O(n×m) over the two occurrence lists.
+ * Range bounds match {@link explode}: `(start, end]` — an occurrence exactly
+ * equal to `start` is skipped; an occurrence exactly equal to `end` is included.
  *
  * @param options - Schedules and range to compare.
  * @param options.cron1 - First crontab expression.
  * @param options.cron2 - Second crontab expression.
- * @param options.start - Start of the range (inclusive). Defaults to `new Date()`.
- * @param options.end - End of the range. Defaults to `new Date()`.
+ * @param options.start - Start of the range. Defaults to `new Date()`.
+ *   An occurrence exactly equal to `start` is **not** included.
+ * @param options.end - End of the range (inclusive). Defaults to `new Date()`.
  * @param options.utc - When `true`, evaluate both crons in UTC; otherwise use
  *   the local timezone. Defaults to `false`.
  *

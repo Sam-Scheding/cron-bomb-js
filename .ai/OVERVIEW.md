@@ -4,7 +4,7 @@ Small TypeScript-first library that expands recurring event objects (described b
 
 ## Problem it solves
 
-Recurring events (opening hours, bookings, holidays) are awkward to store either as every concrete instance in a DB, or as a custom recurrence model with second/minute/hour fields. cron-bomb keeps a normal event object plus a single crontab field, and materializes occurrences on demand for a `[start, end]` window — including exclusions (cancellations) and pairwise schedule overlap checks.
+Recurring events (opening hours, bookings, holidays) are awkward to store either as every concrete instance in a DB, or as a custom recurrence model with second/minute/hour fields. cron-bomb keeps a normal event object plus a single crontab field, and materializes occurrences on demand for a `(start, end]` window — including exclusions (cancellations) and pairwise schedule overlap checks.
 
 ## Public API
 
@@ -18,7 +18,7 @@ Core function. Turns one object (or an array of objects) that carry a cron expre
 | Input                           | Behavior                                                                                                                     |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | `data`                          | Object or array. Must include the crontab field (default key `cron`). Other properties are copied onto every output row.     |
-| `options.start` / `options.end` | Inclusive window as `Date`s. Default both `new Date()`. Throws `RangeError` if start > end.                                  |
+| `options.start` / `options.end` | `Date` window as `(start, end]`: occurrence exactly on `start` is skipped; exactly on `end` is included. Default both `new Date()`. Throws `RangeError` if start > end. |
 | `options.field`                 | Name of the crontab property (default `'cron'`). Missing field → `ReferenceError`. Invalid cron → error from `cron-parser`.  |
 | `options.exclude`               | `Date` or ISO string list; exact-millisecond matches are skipped (cancellations).                                            |
 | `options.utc`                   | Passed through to `cron-parser` (`false` = local TZ).                                                                        |

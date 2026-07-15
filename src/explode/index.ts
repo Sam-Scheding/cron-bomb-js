@@ -9,8 +9,9 @@ import { toExcludedTimes } from "../utils/to-excluded-times";
  *
  * Each input object must include a crontab string (by default under the key
  * `cron`). Every other property on the object is copied onto each result row.
- * For each occurrence in `[start, end]`, the crontab field is replaced with an
- * ISO 8601 timestamp (`Date#toISOString()`).
+ * For each occurrence in `(start, end]` (see {@link ExplodeOptions.start} /
+ * {@link ExplodeOptions.end}), the crontab field is replaced with an ISO 8601
+ * timestamp (`Date#toISOString()`).
  *
  * When `data` is an array, events are expanded in input order and concatenated
  * (all of event A, then all of event B). Results are not sorted by date unless
@@ -22,8 +23,11 @@ import { toExcludedTimes } from "../utils/to-excluded-times";
  * @param data - A single event object, or an array of event objects, each
  *   containing a crontab string under {@link ExplodeOptions.field}.
  * @param options - Expansion options.
- * @param options.start - Start of the range (inclusive). Defaults to `new Date()`.
- * @param options.end - End of the range. Defaults to `new Date()`.
+ * @param options.start - Start of the range. Defaults to `new Date()`.
+ *   An occurrence exactly equal to `start` is **not** included (iteration
+ *   begins after this instant, matching `cron-parser`'s `currentDate` behavior).
+ * @param options.end - End of the range (inclusive). Defaults to `new Date()`.
+ *   An occurrence exactly equal to `end` **is** included.
  * @param options.field - Property name for the crontab. Defaults to `"cron"`.
  * @param options.exclude - Occurrences to omit. Accepts `Date`s and/or ISO
  *   strings (both are normalized to epoch ms). Matching is exact-millisecond.

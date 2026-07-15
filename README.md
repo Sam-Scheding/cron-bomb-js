@@ -62,7 +62,7 @@ import {
 
 ### `explode(data, options?)`
 
-Expand one event object (or an array of them) into occurrence rows for `[start, end]`.
+Expand one event object (or an array of them) into occurrence rows for `(start, end]`.
 
 Each input must include a crontab string (default field name `"cron"`). Every other property is copied onto each result. The crontab field is replaced with an ISO 8601 timestamp (`Date#toISOString()`) per occurrence.
 
