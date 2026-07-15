@@ -36,7 +36,7 @@ const occurrences = explode(
     title: "Weekday standup",
     cron: "0 9 * * 1-5",
   },
-  { start, end, utc: true },
+  { start, end },
 );
 
 // [
@@ -46,7 +46,7 @@ const occurrences = explode(
 // ]
 ```
 
-Prefer `utc: true` unless you intentionally want the process local timezone.
+Cron evaluation defaults to `"UTC"`. Pass an IANA `tz` (e.g. `"Australia/Sydney"`) when you need another zone.
 
 ## API
 
@@ -72,7 +72,7 @@ explode(data, {
   end?: Date; // default: new Date()
   field?: string; // crontab property name; default: "cron"
   exclude?: Array<Date | string>; // exact-ms cancellations
-  utc?: boolean; // default: false (local TZ)
+  tz?: string; // IANA timezone; default: "UTC"
   sorted?: boolean; // reserved; not implemented yet
 });
 ```
@@ -84,7 +84,7 @@ explode(data, {
 | Array input | Events are expanded in input order and concatenated (all of A, then all of B). Not interleaved by date. |
 | `exclude` | `Date` and/or ISO strings; compared by exact epoch millisecond. |
 | Custom `field` | Reads that property for the crontab and writes ISO timestamps back to the same key. |
-| Timezone | `utc: true` evaluates in UTC; `false` uses the runtime local timezone. |
+| Timezone | `tz` is passed to `cron-parser` (default `"UTC"`). Use an IANA name for other zones. |
 | Range bounds | An occurrence exactly equal to `start` is skipped (iteration starts after `currentDate`). An occurrence exactly equal to `end` is included. |
 | Errors | `RangeError` if `start > end`; `ReferenceError` if the crontab field is missing; invalid cron throws from [`cron-parser`](https://www.npmjs.com/package/cron-parser). |
 
@@ -93,7 +93,7 @@ explode(data, {
 ```ts
 explode(
   { title: "Shift", schedule: "10 0 * * 1-5" },
-  { start, end, field: "schedule", utc: true },
+  { start, end, field: "schedule" },
 );
 // => [{ title: "Shift", schedule: "2020-01-01T00:10:00.000Z" }, ...]
 ```
@@ -104,7 +104,6 @@ explode(
 explode(event, {
   start,
   end,
-  utc: true,
   exclude: [
     "2020-01-02T00:10:00.000Z",
     new Date("2020-01-03T00:10:00.000Z"),
@@ -122,7 +121,7 @@ intersection({
   cron2: string;
   start?: Date;
   end?: Date;
-  utc?: boolean;
+  tz?: string; // default: "UTC"
 }): string[];
 ```
 
@@ -132,7 +131,6 @@ const overlaps = intersection({
   cron2: "0 9 * * 1", // Mondays
   start: new Date("2020-01-01T00:00:00.000Z"),
   end: new Date("2020-01-31T00:00:00.000Z"),
-  utc: true,
 });
 // => ["2020-01-06T09:00:00.000Z", "2020-01-13T09:00:00.000Z", ...]
 ```

@@ -31,8 +31,8 @@ import { toExcludedTimes } from "../utils/to-excluded-times";
  * @param options.field - Property name for the crontab. Defaults to `"cron"`.
  * @param options.exclude - Occurrences to omit. Accepts `Date`s and/or ISO
  *   strings (both are normalized to epoch ms). Matching is exact-millisecond.
- * @param options.utc - When `true`, evaluate the cron in UTC (`tz: "UTC"`);
- *   otherwise use the local timezone. Defaults to `false`.
+ * @param options.tz - IANA timezone for cron evaluation (e.g. `"UTC"`,
+ *   `"Australia/Sydney"`). Passed through to `cron-parser`. Defaults to `"UTC"`.
  * @param options.sorted - Reserved for future date-sorted output. Currently ignored.
  *
  * @returns An array of event copies with the crontab field replaced by ISO
@@ -49,7 +49,7 @@ import { toExcludedTimes } from "../utils/to-excluded-times";
  *   {
  *     start: new Date('2020-01-01T00:00:00.000Z'),
  *     end: new Date('2020-01-08T00:00:00.000Z'),
- *     utc: true,
+ *     tz: 'UTC',
  *   },
  * );
  * // => [{ title: 'Standup', cron: '2020-01-01T09:00:00.000Z' }, ...]
@@ -65,7 +65,7 @@ export function explode<
     end = new Date(),
     field = "cron" as F,
     exclude = [],
-    utc = false,
+    tz = "UTC",
     sorted: _sorted = false,
   }: ExplodeOptions<F> = {},
 ): Array<ExplodedEvent<T, F>> {
@@ -89,7 +89,7 @@ export function explode<
     const interval = CronExpressionParser.parse(String(event[field]), {
       currentDate: start,
       endDate: end,
-      ...(utc ? { tz: "UTC" } : {}),
+      tz,
     });
 
     while (interval.hasNext()) {

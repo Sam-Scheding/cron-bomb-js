@@ -23,12 +23,11 @@ So: **eventually native = no extra install.** **Adopt early on the default expor
 
 ## What hurts with `Date` today
 
-cron-bomb’s public surface is built on `Date` + ISO strings + a boolean `utc` flag:
+cron-bomb’s public surface is built on `Date` + ISO strings + an IANA `tz` string (default `"UTC"`, aligned with `cron-parser`).
 
 | Pain | How it shows up here |
 | --- | --- |
-| Instant vs calendar time are conflated | Cron fields mean “wall clock in a timezone” (hour 9, weekday Monday). `Date` is always a UTC instant; `utc: false` means “interpret in whatever TZ the process happens to use.” |
-| Ambiguous local semantics | `explode(..., { utc: false })` is environment-dependent. Tests must pin `TZ=` or use `utc: true`. |
+| Instant vs calendar time are conflated | Cron fields mean “wall clock in a timezone” (hour 9, weekday Monday). `Date` is always a UTC instant; `tz` selects which zone those fields are evaluated in. |
 | Exclusion matching is brittle | `exclude` is normalized to epoch ms. Same wall time in another offset, or a truncated ISO string, fails exact match even when a human would say “that occurrence.” |
 | Output is instant-shaped only | Results replace the crontab field with `toISOString()`. Callers who want “9am Sydney on that day” re-derive timezone themselves. |
 | Range bounds are hard to explain | `(start, end]` is defined on instants. For schedule UX, people often mean calendar-day or zoned local ranges. |
@@ -39,7 +38,7 @@ None of this blocks shipping, but it is the class of problem Temporal was design
 
 ### 1. Explicit calendar / timezone types
 
-Instead of `Date` + `utc?: boolean`, options could take:
+Instead of only `Date` + string `tz`, options could take:
 
 - `Temporal.Instant` — absolute points (good for exclude by exact instant)
 - `Temporal.ZonedDateTime` — wall time in a named zone (`Australia/Sydney`)
@@ -47,17 +46,15 @@ Instead of `Date` + `utc?: boolean`, options could take:
 
 That makes “run at 09:00 in London” a first-class input, not “set `TZ` on the server.”
 
-### 2. A clearer replacement for `utc`
+### 2. Richer than string `tz` alone
 
-`utc: true | false` could become something like:
+We already prefer `tz?: string` over a boolean `utc` flag. Temporal would go further than an IANA name + `Date`:
 
 ```ts
 { timeZone: "UTC" }
-// or
-{ timeZone: "Australia/Sydney" }
+// or zoned inputs:
+{ start: Temporal.ZonedDateTime, end: Temporal.ZonedDateTime }
 ```
-
-Defaulting to `"UTC"` for libraries would remove the “local machine TZ” footgun while still supporting local via an explicit zone.
 
 ### 3. Better exclude semantics (optional modes)
 
@@ -124,7 +121,7 @@ Subpath is probably enough for this repo; a separate package only if the polyfil
 
 - They **opt in** by importing that path.
 - Until Temporal is native in their runtime, they (or we) provide a polyfill — ideally as a **peerDependency** documented as: “requires global `Temporal` or `@js-temporal/polyfill`.”
-- Default `import "cron-bomb"` remains `Date` / ISO / `utc` and does **not** pull Temporal.
+- Default `import "cron-bomb"` remains `Date` / ISO / `tz` and does **not** pull Temporal.
 
 ### Strawman API on that entry
 
@@ -146,9 +143,9 @@ Shared algorithm, different boundary types — same test matrix for cron behavio
 
 | Horizon | Action |
 | --- | --- |
-| Now | Stay on `Date` + ISO + explicit `utc` / document `TZ` for local. No Temporal on the default export. |
+| Now | Stay on `Date` + ISO + IANA `tz` (default `"UTC"`). No Temporal on the default export. |
 | Later (early Temporal era) | Prefer an opt-in **`cron-bomb/temporal`** (or companion package), not a breaking rewrite of the main entry. Peer/document the polyfill. |
 | Later (Temporal baseline) | Same Temporal entry can drop the polyfill peer; optionally reconsider whether default should stay Date-based forever. |
-| Highest-value use | Replacing `utc: boolean` with `timeZone: string`, and making `start`/`end`/`exclude` zoned/instant-explicit — not rewriting cron math. |
+| Highest-value use | Zoned/instant-explicit `start`/`end`/`exclude` beyond string `tz` — not rewriting cron math. |
 
 **Bottom line:** Temporal’s value for cron-bomb is mainly **API clarity** (timezone intent, exclude modes, zoned outputs), not faster explode or ditching cron-parser. Keep the core package Date-native; if/when we offer Temporal, put it behind **`cron-bomb/temporal`** so only interested consumers take on native Temporal or a polyfill.
