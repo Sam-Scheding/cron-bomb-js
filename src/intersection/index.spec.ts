@@ -13,7 +13,6 @@ describe("intersection()", () => {
           cron1: "10 0 * * 1-5",
           cron2: "10 0 * * 1-5",
           ...weekdayWindow,
-          utc: true,
         }),
       ).toEqual([
         "2020-01-01T00:10:00.000Z",
@@ -30,7 +29,6 @@ describe("intersection()", () => {
           cron1: "0 0 * * 1",
           cron2: "0 0 * * 2",
           ...weekdayWindow,
-          utc: true,
         }),
       ).toEqual([]);
     });
@@ -44,7 +42,6 @@ describe("intersection()", () => {
           cron1: "10 0 * * 1-5",
           cron2: "10 0 * * 1",
           ...weekdayWindow,
-          utc: true,
         }),
       ).toEqual(["2020-01-06T00:10:00.000Z"]);
     });
@@ -56,7 +53,6 @@ describe("intersection()", () => {
           cron1: "10 0 * * 1-5",
           cron2: "10 0 6 1 *",
           ...weekdayWindow,
-          utc: true,
         }),
       ).toEqual(["2020-01-06T00:10:00.000Z"]);
     });
@@ -68,7 +64,6 @@ describe("intersection()", () => {
           cron2: "20 0 * * *",
           start: new Date("2020-01-01T00:00:00.000Z"),
           end: new Date("2020-01-03T00:00:00.000Z"),
-          utc: true,
         }),
       ).toEqual([]);
     });
@@ -78,13 +73,11 @@ describe("intersection()", () => {
         cron1: "10 0 * * 1-5",
         cron2: "10 0 * * 1,3",
         ...weekdayWindow,
-        utc: true,
       });
       const b = intersection({
         cron1: "10 0 * * 1,3",
         cron2: "10 0 * * 1-5",
         ...weekdayWindow,
-        utc: true,
       });
       expect([...a].sort()).toEqual([...b].sort());
       expect([...a].sort()).toEqual([
@@ -102,12 +95,8 @@ describe("intersection()", () => {
           cron1: "10 0 * * 1-5",
           cron2: "10 0 * * 1,3",
           ...weekdayWindow,
-          utc: true,
         }),
-      ).toEqual([
-        "2020-01-01T00:10:00.000Z",
-        "2020-01-06T00:10:00.000Z",
-      ]);
+      ).toEqual(["2020-01-01T00:10:00.000Z", "2020-01-06T00:10:00.000Z"]);
     });
 
     it("returns only ISO strings, not event objects", () => {
@@ -115,7 +104,6 @@ describe("intersection()", () => {
         cron1: "10 0 * * 1",
         cron2: "10 0 * * 1-5",
         ...weekdayWindow,
-        utc: true,
       });
       expect(received).toEqual(["2020-01-06T00:10:00.000Z"]);
       expect(typeof received[0]).toBe("string");
@@ -126,7 +114,6 @@ describe("intersection()", () => {
         cron1: "10 0 * * 1",
         cron2: "10 0 * * 1",
         ...weekdayWindow,
-        utc: true,
       });
       expect(received).toEqual(["2020-01-06T00:10:00.000Z"]);
       expect(new Set(received).size).toBe(received.length);
@@ -142,7 +129,6 @@ describe("intersection()", () => {
           cron2: "10 0 * * *",
           start: new Date("2020-01-01T00:00:00.000Z"),
           end: new Date("2020-01-01T00:10:00.000Z"),
-          utc: true,
         }),
       ).toEqual(["2020-01-01T00:10:00.000Z"]);
 
@@ -152,7 +138,6 @@ describe("intersection()", () => {
           cron2: "10 0 * * *",
           start: new Date("2020-01-01T00:10:00.000Z"),
           end: new Date("2020-01-01T01:00:00.000Z"),
-          utc: true,
         }),
       ).toEqual([]);
     });
@@ -164,49 +149,38 @@ describe("intersection()", () => {
           cron2: "0 0 * * 1",
           start: new Date("2020-01-01T00:00:00.000Z"),
           end: new Date("2020-01-03T00:00:00.000Z"),
-          utc: true,
         }),
       ).toEqual([]);
     });
 
-    it("passes utc through so both sides are evaluated consistently", () => {
-      const previousTz = process.env.TZ;
-      process.env.TZ = "Australia/Sydney";
-      try {
-        const utc = intersection({
-          cron1: "10 0 * * 1-5",
-          cron2: "10 0 * * 1-5",
-          ...weekdayWindow,
-          utc: true,
-        });
-        const local = intersection({
-          cron1: "10 0 * * 1-5",
-          cron2: "10 0 * * 1-5",
-          ...weekdayWindow,
-          utc: false,
-        });
-        expect(utc).toEqual([
-          "2020-01-01T00:10:00.000Z",
-          "2020-01-02T00:10:00.000Z",
-          "2020-01-03T00:10:00.000Z",
-          "2020-01-06T00:10:00.000Z",
-          "2020-01-07T00:10:00.000Z",
-        ]);
-        expect(local).toEqual([
-          "2020-01-01T13:10:00.000Z",
-          "2020-01-02T13:10:00.000Z",
-          "2020-01-05T13:10:00.000Z",
-          "2020-01-06T13:10:00.000Z",
-          "2020-01-07T13:10:00.000Z",
-        ]);
-        expect(utc).not.toEqual(local);
-      } finally {
-        if (previousTz === undefined) {
-          delete process.env.TZ;
-        } else {
-          process.env.TZ = previousTz;
-        }
-      }
+    it("passes tz through so both sides are evaluated consistently", () => {
+      const inUtc = intersection({
+        cron1: "10 0 * * 1-5",
+        cron2: "10 0 * * 1-5",
+        ...weekdayWindow,
+        tz: "UTC",
+      });
+      const inSydney = intersection({
+        cron1: "10 0 * * 1-5",
+        cron2: "10 0 * * 1-5",
+        ...weekdayWindow,
+        tz: "Australia/Sydney",
+      });
+      expect(inUtc).toEqual([
+        "2020-01-01T00:10:00.000Z",
+        "2020-01-02T00:10:00.000Z",
+        "2020-01-03T00:10:00.000Z",
+        "2020-01-06T00:10:00.000Z",
+        "2020-01-07T00:10:00.000Z",
+      ]);
+      expect(inSydney).toEqual([
+        "2020-01-01T13:10:00.000Z",
+        "2020-01-02T13:10:00.000Z",
+        "2020-01-05T13:10:00.000Z",
+        "2020-01-06T13:10:00.000Z",
+        "2020-01-07T13:10:00.000Z",
+      ]);
+      expect(inUtc).not.toEqual(inSydney);
     });
   });
 });

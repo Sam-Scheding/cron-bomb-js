@@ -1,3 +1,5 @@
+import { type CronExpressionOptions } from "cron-parser";
+
 /**
  * Epoch-millisecond instants that should be omitted from explode results.
  *
@@ -15,7 +17,11 @@ export interface ExplodeOptions<F extends string = "cron"> {
    * `Date` and ISO strings are both accepted and compared by epoch ms.
    */
   exclude?: Array<Date | string>;
-  utc?: boolean;
+  /**
+   * IANA timezone for cron evaluation (passed to `cron-parser` as `tz`).
+   * Defaults to `"UTC"`.
+   */
+  tz?: CronExpressionOptions['tz'];
   /** Reserved: when true, sort output by date. Not yet implemented. */
   sorted?: boolean;
 }
@@ -28,5 +34,6 @@ export interface IntersectionOptions {
   cron2: string;
   start?: Date;
   end?: Date;
-  utc?: boolean;
+  /** IANA timezone for both schedules. Defaults to `"UTC"`. */
+  tz?: CronExpressionOptions['tz'];
 }

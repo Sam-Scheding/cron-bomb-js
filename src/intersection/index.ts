@@ -20,8 +20,7 @@ import { IntersectionOptions } from "../types";
  * @param options.start - Start of the range. Defaults to `new Date()`.
  *   An occurrence exactly equal to `start` is **not** included.
  * @param options.end - End of the range (inclusive). Defaults to `new Date()`.
- * @param options.utc - When `true`, evaluate both crons in UTC; otherwise use
- *   the local timezone. Defaults to `false`.
+ * @param options.tz - IANA timezone for both schedules. Defaults to `"UTC"`.
  *
  * @returns ISO 8601 timestamp strings present in both schedules. Empty if the
  *   schedules never overlap in the given range. Does not return full event
@@ -34,7 +33,7 @@ import { IntersectionOptions } from "../types";
  *   cron2: '0 9 * * 1', // Mondays only
  *   start: new Date('2020-01-01T00:00:00.000Z'),
  *   end: new Date('2020-01-31T00:00:00.000Z'),
- *   utc: true,
+ *   tz: 'UTC',
  * });
  * // => ['2020-01-06T09:00:00.000Z', '2020-01-13T09:00:00.000Z', ...]
  * ```
@@ -44,10 +43,10 @@ export function intersection({
   cron2,
   start = new Date(),
   end = new Date(),
-  utc = false,
+  tz = "UTC",
 }: IntersectionOptions): string[] {
-  const dates1 = explode({ cron: cron1 }, { start, end, utc });
-  const dates2 = explode({ cron: cron2 }, { start, end, utc });
+  const dates1 = explode({ cron: cron1 }, { start, end, tz });
+  const dates2 = explode({ cron: cron2 }, { start, end, tz });
   const result: string[] = [];
 
   // O(n²); fine for typical windows. A set/sort merge would be better at scale.

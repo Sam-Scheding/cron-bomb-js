@@ -19,9 +19,7 @@ describe("explode()", () => {
         { title: "Lord Of The Fries", cron: "2020-01-06T00:10:00.000Z" },
         { title: "Lord Of The Fries", cron: "2020-01-07T00:10:00.000Z" },
       ];
-      expect(
-        explode(data, { ...weekdayWindow, utc: true }),
-      ).toEqual(expected);
+      expect(explode(data, { ...weekdayWindow })).toEqual(expected);
     });
 
     it("accepts data as an array of objects", () => {
@@ -47,9 +45,7 @@ describe("explode()", () => {
         { title: "Shift Eatery", cron: "2020-01-06T00:10:00.000Z" },
         { title: "Shift Eatery", cron: "2020-01-07T00:10:00.000Z" },
       ];
-      expect(
-        explode(data, { ...weekdayWindow, utc: true }),
-      ).toEqual(expected);
+      expect(explode(data, { ...weekdayWindow })).toEqual(expected);
     });
   });
 
@@ -98,9 +94,7 @@ describe("explode()", () => {
         { title: "Lord Of The Fries", [field]: "2020-01-06T00:10:00.000Z" },
         { title: "Lord Of The Fries", [field]: "2020-01-07T00:10:00.000Z" },
       ];
-      expect(
-        explode(data, { ...weekdayWindow, field, utc: true }),
-      ).toEqual(expected);
+      expect(explode(data, { ...weekdayWindow, field })).toEqual(expected);
     });
   });
 
@@ -114,7 +108,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:10:00.000Z"),
             end: new Date("2020-01-01T01:00:00.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([]);
@@ -127,7 +120,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:00:00.000Z"),
             end: new Date("2020-01-01T00:10:00.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([{ cron: "2020-01-01T00:10:00.000Z" }]);
@@ -140,7 +132,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:10:01.000Z"),
             end: new Date("2020-01-02T00:10:00.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([{ cron: "2020-01-02T00:10:00.000Z" }]);
@@ -153,7 +144,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:00:00.000Z"),
             end: new Date("2020-01-01T00:09:59.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([]);
@@ -166,7 +156,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:10:00.000Z"),
             end: new Date("2020-01-01T00:10:00.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([]);
@@ -179,7 +168,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:00:00.000Z"),
             end: new Date("2020-01-01T00:00:00.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([]);
@@ -188,9 +176,7 @@ describe("explode()", () => {
 
   describe("empty and no-hit windows", () => {
     it("returns an empty array when data is an empty array", () => {
-      expect(
-        explode([], { ...weekdayWindow, utc: true }),
-      ).toEqual([]);
+      expect(explode([], { ...weekdayWindow })).toEqual([]);
     });
 
     it("returns an empty array when the cron never fires in the range", () => {
@@ -201,7 +187,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:00:00.000Z"),
             end: new Date("2020-01-03T00:00:00.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([]);
@@ -218,7 +203,7 @@ describe("explode()", () => {
       expect(
         explode(
           { title: "Lord Of The Fries", cron: "10 0 * * 1-5" },
-          { ...weekdayWindow, exclude, utc: true },
+          { ...weekdayWindow, exclude },
         ),
       ).toEqual([]);
     });
@@ -236,9 +221,7 @@ describe("explode()", () => {
         "2020-01-06T00:10:00.000Z",
         "2020-01-07T00:10:00.000Z",
       ];
-      expect(
-        explode(data, { ...weekdayWindow, exclude, utc: true }),
-      ).toEqual([
+      expect(explode(data, { ...weekdayWindow, exclude })).toEqual([
         { title: "Lord Of The Fries", cron: "2020-01-01T00:10:00.000Z" },
       ]);
     });
@@ -254,9 +237,7 @@ describe("explode()", () => {
         "2019-01-06T00:10:00.000Z",
         "2019-01-07T00:10:00.000Z",
       ];
-      expect(
-        explode(data, { ...weekdayWindow, exclude, utc: true }),
-      ).toEqual([
+      expect(explode(data, { ...weekdayWindow, exclude })).toEqual([
         { title: "Lord Of The Fries", cron: "2020-01-01T00:10:00.000Z" },
         { title: "Lord Of The Fries", cron: "2020-01-02T00:10:00.000Z" },
         { title: "Lord Of The Fries", cron: "2020-01-03T00:10:00.000Z" },
@@ -271,7 +252,6 @@ describe("explode()", () => {
           { cron: "10 0 * * 1-5" },
           {
             ...weekdayWindow,
-            utc: true,
             exclude: [new Date("2020-01-01T00:10:00.000Z")],
           },
         ),
@@ -289,7 +269,6 @@ describe("explode()", () => {
           { cron: "10 0 * * 1-5" },
           {
             ...weekdayWindow,
-            utc: true,
             exclude: [
               new Date("2020-01-01T00:10:00.000Z"),
               "2020-01-02T00:10:00.000Z",
@@ -310,7 +289,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:00:00.000Z"),
             end: new Date("2020-01-03T00:00:00.000Z"),
-            utc: true,
             exclude: [new Date("2020-01-01T00:10:00.001Z")],
           },
         ),
@@ -332,7 +310,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:00:00.000Z"),
             end: new Date("2020-01-09T00:00:00.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([
@@ -354,7 +331,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:00:00.000Z"),
             end: new Date("2020-01-08T00:00:00.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([
@@ -371,10 +347,9 @@ describe("explode()", () => {
 
     it("throws if a later event in the array is missing the crontab field", () => {
       expect(() => {
-        explode(
-          [{ cron: "10 0 * * 1-5" }, { title: "missing cron" }],
-          { ...weekdayWindow, utc: true },
-        );
+        explode([{ cron: "10 0 * * 1-5" }, { title: "missing cron" }], {
+          ...weekdayWindow,
+        });
       }).toThrow(ReferenceError);
     });
   });
@@ -387,9 +362,7 @@ describe("explode()", () => {
         location: "Sydney",
         cron: "10 0 * * 1",
       };
-      expect(
-        explode(data, { ...weekdayWindow, utc: true }),
-      ).toEqual([
+      expect(explode(data, { ...weekdayWindow })).toEqual([
         {
           title: "Lord Of The Fries",
           duration: 12,
@@ -400,10 +373,7 @@ describe("explode()", () => {
     });
 
     it("does not invent fields that were not on the input object", () => {
-      const [row] = explode(
-        { cron: "10 0 * * 1" },
-        { ...weekdayWindow, utc: true },
-      );
+      const [row] = explode({ cron: "10 0 * * 1" }, { ...weekdayWindow });
       expect(Object.keys(row).sort()).toEqual(["cron"]);
     });
   });
@@ -418,7 +388,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:00:00.000Z"),
             end: new Date("2020-04-01T00:00:00.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([
@@ -435,7 +404,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:00:00.000Z"),
             end: new Date("2020-01-01T01:00:00.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([
@@ -454,7 +422,6 @@ describe("explode()", () => {
           {
             start: new Date("2020-01-01T00:00:00.000Z"),
             end: new Date("2020-04-01T00:00:00.000Z"),
-            utc: true,
           },
         ),
       ).toEqual([
@@ -466,19 +433,16 @@ describe("explode()", () => {
 
   describe("defaults and options", () => {
     it("uses field 'cron' when options.field is omitted", () => {
-      expect(
-        explode(
-          { cron: "10 0 * * 1" },
-          { ...weekdayWindow, utc: true },
-        ),
-      ).toEqual([{ cron: "2020-01-06T00:10:00.000Z" }]);
+      expect(explode({ cron: "10 0 * * 1" }, { ...weekdayWindow })).toEqual([
+        { cron: "2020-01-06T00:10:00.000Z" },
+      ]);
     });
 
     it("treats a missing exclude as no exclusions", () => {
       expect(
         explode(
           { title: "Lord Of The Fries", cron: "10 0 * * 1-5" },
-          { ...weekdayWindow, utc: true },
+          { ...weekdayWindow },
         ),
       ).toEqual([
         { title: "Lord Of The Fries", cron: "2020-01-01T00:10:00.000Z" },
@@ -489,29 +453,19 @@ describe("explode()", () => {
       ]);
     });
 
-    it("evaluates in local time when utc is false (TZ-pinned)", () => {
-      const previousTz = process.env.TZ;
-      process.env.TZ = "Australia/Sydney";
-      try {
-        expect(
-          explode(
-            { cron: "10 0 * * 1-5" },
-            { ...weekdayWindow, utc: false },
-          ),
-        ).toEqual([
-          { cron: "2020-01-01T13:10:00.000Z" },
-          { cron: "2020-01-02T13:10:00.000Z" },
-          { cron: "2020-01-05T13:10:00.000Z" },
-          { cron: "2020-01-06T13:10:00.000Z" },
-          { cron: "2020-01-07T13:10:00.000Z" },
-        ]);
-      } finally {
-        if (previousTz === undefined) {
-          delete process.env.TZ;
-        } else {
-          process.env.TZ = previousTz;
-        }
-      }
+    it("evaluates cron fields in an explicit IANA timezone", () => {
+      expect(
+        explode(
+          { cron: "10 0 * * 1-5" },
+          { ...weekdayWindow, tz: "Australia/Sydney" },
+        ),
+      ).toEqual([
+        { cron: "2020-01-01T13:10:00.000Z" },
+        { cron: "2020-01-02T13:10:00.000Z" },
+        { cron: "2020-01-05T13:10:00.000Z" },
+        { cron: "2020-01-06T13:10:00.000Z" },
+        { cron: "2020-01-07T13:10:00.000Z" },
+      ]);
     });
   });
 });
