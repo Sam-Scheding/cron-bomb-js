@@ -468,4 +468,89 @@ describe("explode()", () => {
       ]);
     });
   });
+
+  describe("compareFn", () => {
+    const multipassWindow = {
+      start: new Date("2020-01-01T00:00:00.000Z"),
+      end: new Date("2020-01-09T00:00:00.000Z"),
+    };
+
+    it("keeps input-order concatenation when compareFn is omitted", () => {
+      expect(
+        explode(
+          [
+            { title: "a", cron: "0 0 * * 1" },
+            { title: "b", cron: "0 12 * * 3" },
+          ],
+          multipassWindow,
+        ),
+      ).toEqual([
+        { title: "a", cron: "2020-01-06T00:00:00.000Z" },
+        { title: "b", cron: "2020-01-01T12:00:00.000Z" },
+        { title: "b", cron: "2020-01-08T12:00:00.000Z" },
+      ]);
+    });
+
+    it("sorts multipass output chronologically when compareFn orders by occurrence", () => {
+      expect(
+        explode(
+          [
+            { title: "a", cron: "0 0 * * 1" },
+            { title: "b", cron: "0 12 * * 3" },
+          ],
+          {
+            ...multipassWindow,
+            compareFn: (a, b) => a.cron.localeCompare(b.cron),
+          },
+        ),
+      ).toEqual([
+        { title: "b", cron: "2020-01-01T12:00:00.000Z" },
+        { title: "a", cron: "2020-01-06T00:00:00.000Z" },
+        { title: "b", cron: "2020-01-08T12:00:00.000Z" },
+      ]);
+    });
+
+    it("allows custom tie-breaking beyond occurrence time", () => {
+      expect(
+        explode(
+          [
+            { title: "zebra", cron: "0 0 * * 1" },
+            { title: "apple", cron: "0 0 * * 1" },
+          ],
+          {
+            ...weekdayWindow,
+            compareFn: (a, b) => {
+              const byTime = a.cron.localeCompare(b.cron);
+              if (byTime !== 0) return byTime;
+              return String(a.title).localeCompare(String(b.title));
+            },
+          },
+        ),
+      ).toEqual([
+        { title: "apple", cron: "2020-01-06T00:00:00.000Z" },
+        { title: "zebra", cron: "2020-01-06T00:00:00.000Z" },
+      ]);
+    });
+
+    it("sorts using a custom field name for the occurrence timestamp", () => {
+      const field = "at" as const;
+      expect(
+        explode(
+          [
+            { title: "a", [field]: "0 0 * * 1" },
+            { title: "b", [field]: "0 12 * * 3" },
+          ],
+          {
+            ...multipassWindow,
+            field,
+            compareFn: (a, b) => a.at.localeCompare(b.at),
+          },
+        ),
+      ).toEqual([
+        { title: "b", at: "2020-01-01T12:00:00.000Z" },
+        { title: "a", at: "2020-01-06T00:00:00.000Z" },
+        { title: "b", at: "2020-01-08T12:00:00.000Z" },
+      ]);
+    });
+  });
 });

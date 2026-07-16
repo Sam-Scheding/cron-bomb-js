@@ -21,7 +21,7 @@ Core function. Turns one object (or an array of objects) that carry a cron expre
 | `options.field` | Name of the crontab property (default `'cron'`). Missing field → `ReferenceError`. Invalid cron → error from `cron-parser`. |
 | `options.exclude` | `Date` or ISO string list; exact-millisecond matches are skipped (cancellations). |
 | `options.tz` | IANA timezone passed to `cron-parser` (default `"UTC"`). |
-| `options.sorted` | Documented / typed but **not implemented**; output order follows input array order, then occurrence order within each event. |
+| `options.compareFn` | Optional `Array.prototype.sort` comparator applied after expansion. Omit to keep input-order concatenation (all of A, then all of B). |
 
 Return type preserves extra fields via generics (`ExplodedEvent<T, F>`): the named cron field becomes `string` (ISO).
 
@@ -33,7 +33,7 @@ Explodes both cron strings over the same range, then returns ISO strings present
 
 - Depends on [`cron-parser`](https://www.npmjs.com/package/cron-parser) v5 (`CronExpressionParser.parse` + `hasNext()` / `next().toDate()`). `tz` is passed through directly.
 - Exclusion matching is exact `getTime()` equality after normalizing via `toExcludedTimes`.
-- Multipass arrays are concatenated per event (event A’s dates, then event B’s), not interleaved by date.
+- Multipass arrays are concatenated per event (event A’s dates, then event B’s) unless `compareFn` is provided.
 - Range window is `(start, end]`: occurrence exactly on `start` is skipped; exactly on `end` is included.
 
 ## Mental model for agents

@@ -8,7 +8,22 @@ import { type CronExpressionOptions } from "cron-parser";
  */
 export type ExcludedTimes = ReadonlySet<number>;
 
-export interface ExplodeOptions<F extends string = "cron"> {
+export type ExplodedEvent<T, F extends string = "cron"> = Omit<T, F> &
+  Record<F, string>;
+
+/**
+ * Comparator for {@link ExplodeOptions.compareFn} — same contract as
+ * `Array.prototype.sort` (`< 0` | `0` | `> 0`).
+ */
+export type ExplodeCompareFn<
+  T extends Record<string, unknown> = Record<string, unknown>,
+  F extends string = "cron",
+> = (a: ExplodedEvent<T, F>, b: ExplodedEvent<T, F>) => number;
+
+export interface ExplodeOptions<
+  F extends string = "cron",
+  T extends Record<string, unknown> = Record<string, unknown>,
+> {
   start?: Date;
   end?: Date;
   field?: F;
@@ -22,12 +37,12 @@ export interface ExplodeOptions<F extends string = "cron"> {
    * Defaults to `"UTC"`.
    */
   tz?: CronExpressionOptions['tz'];
-  /** Reserved: when true, sort output by date. Not yet implemented. */
-  sorted?: boolean;
+  /**
+   * If set, sort the result with this comparator after expansion.
+   * Omit to keep input-order concatenation (all of event A, then all of B).
+   */
+  compareFn?: ExplodeCompareFn<T, F>;
 }
-
-export type ExplodedEvent<T, F extends string = "cron"> = Omit<T, F> &
-  Record<F, string>;
 
 export interface IntersectionOptions {
   cron1: string;
