@@ -54,6 +54,7 @@ Cron evaluation defaults to `"UTC"`. Pass an IANA `tz` (e.g. `"Australia/Sydney"
 import {
   explode,
   intersection,
+  type ExplodeCompareFn,
   type ExplodeOptions,
   type ExplodedEvent,
   type IntersectionOptions,
@@ -73,7 +74,7 @@ explode(data, {
   field?: string; // crontab property name; default: "cron"
   exclude?: Array<Date | string>; // exact-ms cancellations
   tz?: string; // IANA timezone; default: "UTC"
-  sorted?: boolean; // reserved; not implemented yet
+  compareFn?: (a, b) => number; // optional; Array.prototype.sort contract
 });
 ```
 
@@ -81,7 +82,8 @@ explode(data, {
 
 | Topic | Behavior |
 | --- | --- |
-| Array input | Events are expanded in input order and concatenated (all of A, then all of B). Not interleaved by date. |
+| Array input | Events are expanded in input order and concatenated (all of A, then all of B). Not interleaved by date unless you pass `compareFn`. |
+| `compareFn` | Applied to the full result after expansion. Same contract as `Array.prototype.sort`. Omit to keep concat order. |
 | `exclude` | `Date` and/or ISO strings; compared by exact epoch millisecond. |
 | Custom `field` | Reads that property for the crontab and writes ISO timestamps back to the same key. |
 | Timezone | `tz` is passed to `cron-parser` (default `"UTC"`). Use an IANA name for other zones. |
@@ -108,6 +110,19 @@ explode(event, {
     "2020-01-02T00:10:00.000Z",
     new Date("2020-01-03T00:10:00.000Z"),
   ],
+});
+```
+
+**Sorting multipass output**
+
+```ts
+explode([eventA, eventB], {
+  start,
+  end,
+  // ISO timestamps sort lexicographically; tie-break on title if you want
+  compareFn: (a, b) =>
+    a.cron.localeCompare(b.cron) ||
+    String(a.title).localeCompare(String(b.title)),
 });
 ```
 

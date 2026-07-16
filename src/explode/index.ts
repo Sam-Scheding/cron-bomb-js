@@ -14,8 +14,8 @@ import { toExcludedTimes } from "../utils/to-excluded-times";
  * timestamp (`Date#toISOString()`).
  *
  * When `data` is an array, events are expanded in input order and concatenated
- * (all of event A, then all of event B). Results are not sorted by date unless
- * you do so yourself; `options.sorted` is reserved but not yet implemented.
+ * (all of event A, then all of event B). Pass {@link ExplodeOptions.compareFn}
+ * to sort the combined result (e.g. by occurrence time).
  *
  * @typeParam T - Shape of each input event object.
  * @typeParam F - Name of the field that holds the crontab (defaults to `"cron"`).
@@ -33,7 +33,9 @@ import { toExcludedTimes } from "../utils/to-excluded-times";
  *   strings (both are normalized to epoch ms). Matching is exact-millisecond.
  * @param options.tz - IANA timezone for cron evaluation (e.g. `"UTC"`,
  *   `"Australia/Sydney"`). Passed through to `cron-parser`. Defaults to `"UTC"`.
- * @param options.sorted - Reserved for future date-sorted output. Currently ignored.
+ * @param options.compareFn - Optional comparator applied to the full result
+ *   after expansion (`Array.prototype.sort` contract). Omit to keep
+ *   input-order concatenation.
  *
  * @returns An array of event copies with the crontab field replaced by ISO
  *   timestamp strings for each occurrence in range (minus exclusions).
@@ -66,11 +68,9 @@ export function explode<
     field = "cron" as F,
     exclude = [],
     tz = "UTC",
-    sorted: _sorted = false,
-  }: ExplodeOptions<F> = {},
+    compareFn,
+  }: ExplodeOptions<F, T> = {},
 ): Array<ExplodedEvent<T, F>> {
-  void _sorted;
-
   const output: Array<ExplodedEvent<T, F>> = [];
   const events = Array.isArray(data) ? data : [data];
   const excludedTimes = toExcludedTimes(exclude);
@@ -102,6 +102,10 @@ export function explode<
         [field]: current.toISOString(),
       } as ExplodedEvent<T, F>);
     }
+  }
+
+  if (compareFn) {
+    output.sort(compareFn);
   }
 
   return output;
