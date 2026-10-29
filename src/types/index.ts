@@ -36,12 +36,27 @@ export interface ExplodeOptions<
    * IANA timezone for cron evaluation (passed to `cron-parser` as `tz`).
    * Defaults to `"UTC"`.
    */
-  tz?: CronExpressionOptions['tz'];
+  tz?: CronExpressionOptions["tz"];
   /**
    * If set, sort the result with this comparator after expansion.
    * Omit to keep input-order concatenation (all of event A, then all of B).
    */
   compareFn?: ExplodeCompareFn<T, F>;
+}
+
+export interface NavigateOptions {
+  /** Reference instant. Defaults to `new Date()`. */
+  at?: Date;
+  /** IANA timezone for cron evaluation. Defaults to `"UTC"`. */
+  tz?: CronExpressionOptions["tz"];
+}
+
+/** A recurring window opened by one crontab and closed by another. */
+export interface BetweenWindow {
+  /** Crontab for when the window opens. */
+  from: string;
+  /** Crontab for when the window closes. */
+  to: string;
 }
 
 export interface IntersectionOptions {
@@ -50,5 +65,5 @@ export interface IntersectionOptions {
   start?: Date;
   end?: Date;
   /** IANA timezone for both schedules. Defaults to `"UTC"`. */
-  tz?: CronExpressionOptions['tz'];
+  tz?: CronExpressionOptions["tz"];
 }
