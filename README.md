@@ -54,10 +54,15 @@ Cron evaluation defaults to `"UTC"`. Pass an IANA `tz` (e.g. `"Australia/Sydney"
 import {
   explode,
   intersection,
+  isBetween,
+  next,
+  previous,
+  type BetweenWindow,
   type ExplodeCompareFn,
   type ExplodeOptions,
   type ExplodedEvent,
   type IntersectionOptions,
+  type NavigateOptions,
 } from "cron-bomb";
 ```
 
@@ -151,6 +156,37 @@ const overlaps = intersection({
 ```
 
 Results follow `cron1`’s expansion order. Returns only timestamp strings, not full event objects.
+
+### `previous(cron, options?)` / `next(cron, options?)`
+
+Find the closest occurrence of a crontab before or after an instant. Both return an ISO 8601 string and are **strict**: an occurrence exactly equal to `at` is skipped.
+
+```ts
+previous(cron: string, { at?: Date, tz?: string }): string; // at defaults to now, tz to "UTC"
+next(cron: string, { at?: Date, tz?: string }): string;
+```
+
+```ts
+const at = new Date("2020-01-03T12:00:00.000Z");
+previous("0 9 * * 1-5", { at }); // => "2020-01-03T09:00:00.000Z"
+next("0 9 * * 1-5", { at }); // => "2020-01-06T09:00:00.000Z"
+```
+
+### `isBetween({ from, to }, options?)`
+
+Check whether an instant falls inside a recurring window that one crontab opens and another closes (e.g. opening hours).
+
+```ts
+isBetween({ from: string, to: string }, { at?: Date, tz?: string }): boolean;
+```
+
+```ts
+const hours = { from: "0 9 * * 1-5", to: "0 17 * * 1-5" };
+isBetween(hours, { at: new Date("2020-01-01T12:00:00.000Z") }); // => true
+isBetween(hours, { at: new Date("2020-01-01T18:00:00.000Z") }); // => false
+```
+
+The window is active when the latest `from` at or before `at` is later than the latest `to` at or before `at`. Bounds are `[from, to)` (open at the `from` instant, closed at the `to` instant), windows may cross midnight, and if both crontabs fire on the same instant `to` wins.
 
 ## Cron syntax
 

@@ -29,6 +29,14 @@ Return type preserves extra fields via generics (`ExplodedEvent<T, F>`): the nam
 
 Explodes both cron strings over the same range, then returns ISO strings present in both (naïve O(n²) nested loop). Useful for clash detection (e.g. booking vs public holiday). Does not return full event objects — only timestamps. Identical schedules yield all of their shared occurrences; disjoint day-of-week crons yield `[]`.
 
+### `previous(cron, { at?, tz? })` / `next(cron, { at?, tz? })`
+
+Thin wrappers over cron-parser `prev()` / `next()` (strictly before / after `at`). Return ISO strings, like `explode`. Live in `src/navigate`.
+
+### `isBetween({ from, to }, { at?, tz? })`
+
+True when the latest `from` occurrence at or before `at` is later than the latest `to` occurrence at or before `at` (`[from, to)`; `to` wins ties). `at` is rounded up to the next whole second so same-second occurrences count.
+
 ## Implementation notes
 
 - Depends on [`cron-parser`](https://www.npmjs.com/package/cron-parser) v5 (`CronExpressionParser.parse` + `hasNext()` / `next().toDate()`). `tz` is passed through directly.
